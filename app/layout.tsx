@@ -29,10 +29,17 @@ export default function RootLayout({
     <html lang="de" suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="light" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable}`}
         suppressHydrationWarning
+        style={{
+          margin: 0,
+          padding: 0,
+          backgroundColor: "var(--mantine-color-body)",
+          color: "var(--mantine-color-text)",
+        }}
       >
         <Providers>{children}</Providers>
       </body>

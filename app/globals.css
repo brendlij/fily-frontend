@@ -2,28 +2,68 @@
 @import "@mantine/notifications/styles.css";
 @import "@mantine/dropzone/styles.css";
 
+/* Light mode variables */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+/* Dark mode variables */
+[data-mantine-color-scheme="dark"] {
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --mantine-color-body: #1a1a1a !important;
+  --mantine-color-text: #ffffff !important;
+  --mantine-color-dark-0: #c9c9c9;
+  --mantine-color-dark-1: #b8b8b8;
+  --mantine-color-dark-2: #828282;
+  --mantine-color-dark-3: #696969;
+  --mantine-color-dark-4: #424242;
+  --mantine-color-dark-5: #3b3b3b;
+  --mantine-color-dark-6: #2e2e2e;
+  --mantine-color-dark-7: #242424;
+  --mantine-color-dark-8: #1a1a1a;
+  --mantine-color-dark-9: #0c0c0c;
+  --mantine-color-white: #ffffff;
+  --mantine-color-black: #000000;
+  --mantine-color-dimmed: #909296;
+}
+
+/* Light mode variables */
+[data-mantine-color-scheme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  --mantine-color-body: #ffffff !important;
+  --mantine-color-text: #1a1a1a !important;
+  --mantine-color-dark-0: #c9c9c9;
+  --mantine-color-dark-1: #b8b8b8;
+  --mantine-color-dark-2: #828282;
+  --mantine-color-dark-3: #696969;
+  --mantine-color-dark-4: #424242;
+  --mantine-color-dark-5: #3b3b3b;
+  --mantine-color-dark-6: #2e2e2e;
+  --mantine-color-dark-7: #242424;
+  --mantine-color-dark-8: #1a1a1a;
+  --mantine-color-dark-9: #0c0c0c;
+  --mantine-color-white: #ffffff;
+  --mantine-color-black: #000000;
+  --mantine-color-dimmed: #909296;
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background: #ffffff;
-  color: #171717;
-}
-
-/* Force light mode appearance */
-[data-mantine-color-scheme="light"] {
-  --mantine-color-body: #ffffff;
-  --mantine-color-text: #1a1a1a;
+  background: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--mantine-color-text);
+  background: var(--mantine-color-body);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -40,8 +80,195 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.enhanced-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.enhanced-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Force correct colors for all Mantine components */
+[data-mantine-color-scheme="dark"] {
+  color-scheme: dark;
+}
+
+[data-mantine-color-scheme="light"] {
+  color-scheme: light;
+}
+
+/* Dark mode specific component styles */
+[data-mantine-color-scheme="dark"] .mantine-Paper-root {
+  background-color: var(--mantine-color-dark-8) !important;
+  color: var(--mantine-color-dark-0) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Container-root {
+  background-color: var(--mantine-color-dark-9) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Title-root {
+  color: var(--mantine-color-dark-0) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Text-root {
+  color: var(--mantine-color-dark-1) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-TextInput-input,
+[data-mantine-color-scheme="dark"] .mantine-PasswordInput-input,
+[data-mantine-color-scheme="dark"] .mantine-Select-input {
+  background-color: var(--mantine-color-dark-7) !important;
+  color: var(--mantine-color-dark-0) !important;
+  border-color: var(--mantine-color-dark-5) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Input-label {
+  color: var(--mantine-color-dark-1) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-content {
+  background-color: var(--mantine-color-dark-8) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-header {
+  background-color: var(--mantine-color-dark-8) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-title {
+  color: var(--mantine-color-dark-0) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Card-root {
+  background-color: var(--mantine-color-dark-7) !important;
+  color: var(--mantine-color-dark-0) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Tooltip-tooltip {
+  background-color: var(--mantine-color-dark-6) !important;
+  color: var(--mantine-color-dark-0) !important;
+}
+
+/* Light mode specific component styles */
+[data-mantine-color-scheme="light"] .mantine-Paper-root {
+  background-color: var(--mantine-color-white) !important;
+  color: var(--mantine-color-black) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Container-root {
+  background-color: var(--mantine-color-white) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Title-root {
+  color: var(--mantine-color-black) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Text-root {
+  color: var(--mantine-color-dark-6) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Card-root {
+  background-color: var(--mantine-color-white) !important;
+  color: var(--mantine-color-black) !important;
+}
+
+/* AppShell specific styles */
+[data-mantine-color-scheme="dark"] .mantine-AppShell-root {
+  background-color: var(--mantine-color-dark-9) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-AppShell-header {
+  background-color: var(--mantine-color-dark-8) !important;
+  border-bottom-color: var(--mantine-color-dark-5) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-AppShell-navbar {
+  background-color: var(--mantine-color-dark-8) !important;
+  border-right-color: var(--mantine-color-dark-5) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-AppShell-main {
+  background-color: var(--mantine-color-dark-9) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-AppShell-root {
+  background-color: var(--mantine-color-white) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-AppShell-header {
+  background-color: var(--mantine-color-white) !important;
+  border-bottom-color: #e9ecef !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar {
+  background-color: var(--mantine-color-white) !important;
+  border-right-color: #e9ecef !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-AppShell-main {
+  background-color: var(--mantine-color-white) !important;
 }

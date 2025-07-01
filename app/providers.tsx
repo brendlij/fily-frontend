@@ -14,6 +14,22 @@ function MantineThemeProvider({ children }: { children: React.ReactNode }) {
       fontFamily: "var(--font-geist-sans)",
     },
     defaultRadius: "md",
+    colors: {
+      dark: [
+        "#c9c9c9",
+        "#b8b8b8",
+        "#828282",
+        "#696969",
+        "#424242",
+        "#3b3b3b",
+        "#2e2e2e",
+        "#242424",
+        "#1a1a1a",
+        "#0c0c0c",
+      ],
+    },
+    white: "#ffffff",
+    black: "#000000",
     components: {
       Button: {
         styles: {
@@ -45,6 +61,23 @@ function MantineThemeProvider({ children }: { children: React.ReactNode }) {
             },
           },
         },
+      },
+      Paper: {
+        styles: (theme: MantineTheme) => ({
+          root: {
+            backgroundColor:
+              colorScheme === "dark" ? theme.colors.dark[8] : theme.white,
+            color: colorScheme === "dark" ? theme.colors.dark[0] : theme.black,
+          },
+        }),
+      },
+      Container: {
+        styles: (theme: MantineTheme) => ({
+          root: {
+            backgroundColor:
+              colorScheme === "dark" ? theme.colors.dark[9] : theme.white,
+          },
+        }),
       },
     },
     other: {

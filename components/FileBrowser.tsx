@@ -77,6 +77,11 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [currentUploadFile, setCurrentUploadFile] = useState<string>("");
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    item: FileItem | null;
+  } | null>(null);
 
   const { t, language } = useTheme();
 
@@ -84,6 +89,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
   useEffect(() => {
     loadFiles(currentPath, "none");
+  }, []);
+
+  // Close context menu when clicking elsewhere
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, []);
 
   const loadFiles = async (
@@ -118,16 +130,16 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         setFiles(transformedFiles);
       } else {
         notifications.show({
-          title: "Fehler",
-          message: "Dateien konnten nicht geladen werden",
+          title: t("error"),
+          message: t("filesCouldNotLoad"),
           color: "red",
         });
       }
     } catch (error) {
       console.error("Error loading files:", error);
       notifications.show({
-        title: "Fehler",
-        message: "Verbindung zum Server fehlgeschlagen",
+        title: t("error"),
+        message: t("connectionFailed"),
         color: "red",
       });
     } finally {
@@ -185,27 +197,27 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         document.body.removeChild(a);
 
         notifications.show({
-          title: "Erfolg",
+          title: t("success"),
           message:
             item.type === "directory"
-              ? `Ordner "${item.name}" wird als ZIP heruntergeladen`
-              : `${item.name} wird heruntergeladen`,
+              ? `${t("folder")} "${item.name}" ${t("downloading")}`
+              : `${item.name} ${t("downloading")}`,
           color: "green",
         });
       } else {
         notifications.show({
-          title: "Fehler",
+          title: t("error"),
           message:
             item.type === "directory"
-              ? "ZIP-Download fehlgeschlagen"
-              : "Download fehlgeschlagen",
+              ? t("zipDownloadFailed")
+              : t("downloadFailed"),
           color: "red",
         });
       }
     } catch (error) {
       notifications.show({
-        title: "Fehler",
-        message: "Download fehlgeschlagen",
+        title: t("error"),
+        message: t("downloadFailed"),
         color: "red",
       });
     }
@@ -227,8 +239,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
       if (response.ok) {
         notifications.show({
-          title: "Erfolg",
-          message: `${itemToDelete.name} wurde gelöscht`,
+          title: t("success"),
+          message: `${itemToDelete.name} ${t("deleted")}`,
           color: "green",
         });
         setDeleteModalOpened(false);
@@ -237,8 +249,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       }
     } catch (error) {
       notifications.show({
-        title: "Fehler",
-        message: "Löschen fehlgeschlagen",
+        title: t("error"),
+        message: t("deleteFailed"),
         color: "red",
       });
     }
@@ -247,6 +259,16 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
   const confirmDelete = (item: FileItem) => {
     setItemToDelete(item);
     setDeleteModalOpened(true);
+    setContextMenu(null);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, item: FileItem) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      item,
+    });
   };
 
   const handleRename = async () => {
@@ -269,8 +291,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
       if (response.ok) {
         notifications.show({
-          title: "Erfolg",
-          message: `${selectedItem.name} wurde umbenannt`,
+          title: t("success"),
+          message: `${selectedItem.name} ${t("renamed")}`,
           color: "green",
         });
         setRenameModalOpened(false);
@@ -280,8 +302,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       }
     } catch (error) {
       notifications.show({
-        title: "Fehler",
-        message: "Umbenennen fehlgeschlagen",
+        title: t("error"),
+        message: t("renameFailed"),
         color: "red",
       });
     }
@@ -303,8 +325,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
       if (response.ok) {
         notifications.show({
-          title: "Erfolg",
-          message: `Ordner "${newFolderName}" wurde erstellt`,
+          title: t("success"),
+          message: `${t("folder")} "${newFolderName}" ${t("folderCreated")}`,
           color: "green",
         });
         setNewFolderModalOpened(false);
@@ -313,8 +335,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       }
     } catch (error) {
       notifications.show({
-        title: "Fehler",
-        message: "Ordner konnte nicht erstellt werden",
+        title: t("error"),
+        message: t("folderCreateFailed"),
         color: "red",
       });
     }
@@ -336,15 +358,15 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         if (success) {
           successCount++;
           notifications.show({
-            title: "Erfolg",
-            message: `${file.name} wurde hochgeladen`,
+            title: t("success"),
+            message: `${file.name} ${t("uploaded")}`,
             color: "green",
           });
         }
       } catch (error) {
         notifications.show({
-          title: "Fehler",
-          message: `Upload von ${file.name} fehlgeschlagen`,
+          title: t("error"),
+          message: `${t("uploadFailed")} ${file.name}`,
           color: "red",
         });
       }
@@ -359,8 +381,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     if (successCount > 0) {
       await loadFiles(currentPath, "none");
       notifications.show({
-        title: "Upload abgeschlossen",
-        message: `${successCount} von ${files.length} Dateien erfolgreich hochgeladen`,
+        title: t("uploadCompleted"),
+        message: `${successCount} ${t("filesSuccessfullyUploaded")}`,
         color: "blue",
       });
     }
@@ -467,7 +489,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
       <AppShell.Navbar p="md">
         <Stack gap="md">
-          <Tooltip label="Zur Startseite" position="right">
+          <Tooltip label={t("toHome")} position="right">
             <Button
               leftSection={<IconHome size={14} />}
               variant="light"
@@ -475,29 +497,29 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
               className="enhanced-button"
               style={{ transition: "all 0.2s ease" }}
             >
-              Home
+              {t("home")}
             </Button>
           </Tooltip>
 
-          <Tooltip label="Neuen Ordner erstellen" position="right">
+          <Tooltip label={t("createNewFolder")} position="right">
             <Button
               leftSection={<IconFolderPlus size={14} />}
               onClick={() => setNewFolderModalOpened(true)}
               className="enhanced-button"
               style={{ transition: "all 0.2s ease" }}
             >
-              Neuer Ordner
+              {t("newFolder")}
             </Button>
           </Tooltip>
 
-          <Tooltip label="Dateien hochladen" position="right">
+          <Tooltip label={t("uploadFiles")} position="right">
             <Button
               leftSection={<IconUpload size={14} />}
               onClick={() => setUploadModalOpened(true)}
               className="enhanced-button"
               style={{ transition: "all 0.2s ease" }}
             >
-              Datei hochladen
+              {t("uploadFile")}
             </Button>
           </Tooltip>
         </Stack>
@@ -509,7 +531,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
             {/* Navigation */}
             <Group className="animate-fade-in">
               {currentPath && (
-                <Tooltip label="Einen Ordner zurück" position="bottom">
+                <Tooltip label={t("oneStepBack")} position="bottom">
                   <Button
                     variant="light"
                     size="sm"
@@ -520,7 +542,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                     }}
                     className="hover-lift"
                   >
-                    Zurück
+                    {t("back")}
                   </Button>
                 </Tooltip>
               )}
@@ -633,6 +655,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                             item.type === "directory" &&
                             handleItemClick(item)
                           }
+                          onContextMenu={(e) => handleContextMenu(e, item)}
                         >
                           <Group
                             justify="space-between"
@@ -666,7 +689,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
                             <Menu position="bottom-end">
                               <Menu.Target>
-                                <Tooltip label="Aktionen" position="left">
+                                <Tooltip label={t("actions")} position="left">
                                   <ActionIcon
                                     variant="subtle"
                                     onClick={(e) => e.stopPropagation()} // Verhindert Navigation beim Klick auf Menü
@@ -684,8 +707,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                   }}
                                 >
                                   {item.type === "directory"
-                                    ? "Als ZIP herunterladen"
-                                    : "Download"}
+                                    ? t("downloadAsZip")
+                                    : t("download")}
                                 </Menu.Item>
                                 <Menu.Item
                                   leftSection={<IconEdit size={14} />}
@@ -696,7 +719,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                     setRenameModalOpened(true);
                                   }}
                                 >
-                                  Umbenennen
+                                  {t("rename")}
                                 </Menu.Item>
                                 <Menu.Item
                                   leftSection={<IconTrash size={14} />}
@@ -706,7 +729,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                     confirmDelete(item);
                                   }}
                                 >
-                                  Löschen
+                                  {t("delete")}
                                 </Menu.Item>
                               </Menu.Dropdown>
                             </Menu>
@@ -717,7 +740,9 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                             style={{ marginTop: "auto" }}
                           >
                             <Badge variant="light" size="sm">
-                              {item.type === "directory" ? "Ordner" : "Datei"}
+                              {item.type === "directory"
+                                ? t("folder")
+                                : t("file")}
                             </Badge>
                             {item.size && (
                               <Text size="sm" c="dimmed">
@@ -754,7 +779,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         <Modal
           opened={uploadModalOpened}
           onClose={() => !isUploading && setUploadModalOpened(false)}
-          title="Dateien hochladen"
+          title={t("uploadFilesModal")}
           transitionProps={{
             transition: "slide-up",
             duration: 300,
@@ -767,7 +792,8 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
             {isUploading ? (
               <Stack>
                 <Text size="sm" c="dimmed" ta="center">
-                  {currentUploadFile && `Uploading: ${currentUploadFile}`}
+                  {currentUploadFile &&
+                    `${t("uploading")}: ${currentUploadFile}`}
                 </Text>
                 <Progress
                   value={uploadProgress}
@@ -778,7 +804,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                   style={{ transition: "all 0.3s ease" }}
                 />
                 <Text size="xs" c="dimmed" ta="center">
-                  {uploadProgress}% abgeschlossen
+                  {uploadProgress}% {t("completed")}
                 </Text>
               </Stack>
             ) : (
@@ -805,10 +831,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                   />
                 </Group>
                 <Text ta="center" size="lg" mb="md" fw={500}>
-                  Dateien hier ablegen oder klicken zum Auswählen
+                  {t("dragDropFiles")}
                 </Text>
                 <Text ta="center" size="sm" c="dimmed">
-                  Mehrere Dateien werden unterstützt
+                  {t("multipleSupported")}
                 </Text>
               </Dropzone>
             )}
@@ -819,7 +845,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         <Modal
           opened={newFolderModalOpened}
           onClose={() => setNewFolderModalOpened(false)}
-          title="Neuen Ordner erstellen"
+          title={t("createNewFolderTitle")}
           transitionProps={{
             transition: "slide-up",
             duration: 300,
@@ -828,10 +854,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         >
           <Stack>
             <TextInput
-              label="Ordnername"
+              label={t("folderName")}
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.currentTarget.value)}
-              placeholder="Ordnername eingeben"
+              placeholder={t("enterFolderName")}
               data-autofocus
             />
             <Group justify="flex-end">
@@ -840,13 +866,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                 onClick={() => setNewFolderModalOpened(false)}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Abbrechen
+                {t("cancel")}
               </Button>
               <Button
                 onClick={handleCreateFolder}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Erstellen
+                {t("create")}
               </Button>
             </Group>
           </Stack>
@@ -856,7 +882,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         <Modal
           opened={renameModalOpened}
           onClose={() => setRenameModalOpened(false)}
-          title="Umbenennen"
+          title={t("renameTitle")}
           transitionProps={{
             transition: "slide-up",
             duration: 300,
@@ -865,10 +891,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         >
           <Stack>
             <TextInput
-              label="Neuer Name"
+              label={t("newName")}
               value={newName}
               onChange={(e) => setNewName(e.currentTarget.value)}
-              placeholder="Neuen Namen eingeben"
+              placeholder={t("enterNewName")}
               data-autofocus
             />
             <Group justify="flex-end">
@@ -877,13 +903,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                 onClick={() => setRenameModalOpened(false)}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Abbrechen
+                {t("cancel")}
               </Button>
               <Button
                 onClick={handleRename}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Umbenennen
+                {t("rename")}
               </Button>
             </Group>
           </Stack>
@@ -893,7 +919,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         <Modal
           opened={deleteModalOpened}
           onClose={() => setDeleteModalOpened(false)}
-          title="Löschen bestätigen"
+          title={t("confirmDelete")}
           transitionProps={{
             transition: "slide-up",
             duration: 300,
@@ -902,13 +928,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         >
           <Stack>
             <Text>
-              Möchten Sie <strong>"{itemToDelete?.name}"</strong> wirklich
-              löschen?
+              Möchten Sie <strong>"{itemToDelete?.name}"</strong>{" "}
+              {t("deleteConfirmation")}
             </Text>
             <Text size="sm" c="dimmed">
               {itemToDelete?.type === "directory"
-                ? "Dieser Ordner und alle enthaltenen Dateien werden permanent gelöscht."
-                : "Diese Datei wird permanent gelöscht."}
+                ? t("deleteWarningFolder")
+                : t("deleteWarningFile")}
             </Text>
             <Group justify="flex-end">
               <Button
@@ -916,19 +942,99 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                 onClick={() => setDeleteModalOpened(false)}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Abbrechen
+                {t("cancel")}
               </Button>
               <Button
                 color="red"
                 onClick={handleDelete}
                 style={{ transition: "all 0.2s ease" }}
               >
-                Löschen
+                {t("delete")}
               </Button>
             </Group>
           </Stack>
         </Modal>
       </AppShell.Main>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <Paper
+          style={{
+            position: "fixed",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            zIndex: 1000,
+            minWidth: "180px",
+            padding: "0.25rem",
+          }}
+          shadow="md"
+          withBorder
+        >
+          <Stack gap={2}>
+            <Button
+              variant="subtle"
+              size="xs"
+              leftSection={<IconDownload size={14} />}
+              onClick={() => {
+                if (contextMenu.item) {
+                  handleDownload(contextMenu.item);
+                  setContextMenu(null);
+                }
+              }}
+              style={{
+                justifyContent: "flex-start",
+                height: "32px",
+                fontSize: "0.875rem",
+              }}
+              fullWidth
+            >
+              {contextMenu.item?.type === "directory"
+                ? t("downloadAsZip")
+                : t("download")}
+            </Button>
+            <Button
+              variant="subtle"
+              size="xs"
+              leftSection={<IconEdit size={14} />}
+              onClick={() => {
+                if (contextMenu.item) {
+                  setSelectedItem(contextMenu.item);
+                  setNewName(contextMenu.item.name);
+                  setRenameModalOpened(true);
+                  setContextMenu(null);
+                }
+              }}
+              style={{
+                justifyContent: "flex-start",
+                height: "32px",
+                fontSize: "0.875rem",
+              }}
+              fullWidth
+            >
+              {t("rename")}
+            </Button>
+            <Button
+              variant="subtle"
+              size="xs"
+              leftSection={<IconTrash size={14} />}
+              color="red"
+              onClick={() => {
+                if (contextMenu.item) {
+                  confirmDelete(contextMenu.item);
+                }
+              }}
+              style={{
+                justifyContent: "flex-start",
+                height: "32px",
+                fontSize: "0.875rem",
+              }}
+              fullWidth
+            >
+              {t("delete")}
+            </Button>
+          </Stack>
+        </Paper>
+      )}
     </AppShell>
   );
 }

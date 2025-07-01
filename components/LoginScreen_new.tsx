@@ -13,15 +13,13 @@ import {
   Stack,
   ActionIcon,
   Tooltip,
-  Switch,
-  Select,
-  Box,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconMoon, IconSun, IconLanguage } from "@tabler/icons-react";
+import { IconSettings } from "@tabler/icons-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ClientOnly } from "./ClientOnly";
 import FilyLogo from "./FilyLogo";
+import { LoginSettingsModal } from "./LoginSettingsModal";
 
 interface LoginProps {
   onLogin: (credentials: { username: string; password: string }) => void;
@@ -31,9 +29,9 @@ export function LoginScreen({ onLogin }: LoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
-  const { language, t, colorScheme, toggleColorScheme, setLanguage } =
-    useTheme();
+  const { language, t } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +39,10 @@ export function LoginScreen({ onLogin }: LoginProps) {
     if (!username || !password) {
       notifications.show({
         title: t("error"),
-        message: t("fillAllFields"),
+        message:
+          language === "de"
+            ? "Bitte füllen Sie alle Felder aus"
+            : "Please fill in all fields",
         color: "red",
       });
       return;
@@ -56,20 +57,25 @@ export function LoginScreen({ onLogin }: LoginProps) {
         onLogin({ username, password });
         notifications.show({
           title: t("success"),
-          message: t("loginSuccessful"),
+          message:
+            language === "de" ? "Anmeldung erfolgreich!" : "Login successful!",
           color: "green",
         });
       } else {
         notifications.show({
           title: t("error"),
-          message: t("invalidCredentials"),
+          message:
+            language === "de"
+              ? "Ungültige Anmeldedaten"
+              : "Invalid credentials",
           color: "red",
         });
       }
     } catch (error) {
       notifications.show({
         title: t("error"),
-        message: t("loginFailed"),
+        message:
+          language === "de" ? "Anmeldung fehlgeschlagen" : "Login failed",
         color: "red",
       });
     } finally {
@@ -79,61 +85,33 @@ export function LoginScreen({ onLogin }: LoginProps) {
 
   return (
     <ClientOnly>
-      <Box
-        style={{
-          minHeight: "100vh",
-          background: "var(--mantine-color-body)",
-          color: "var(--mantine-color-text)",
-        }}
-      >
-        {/* Settings Header Bar */}
-        <Group
-          justify="flex-end"
-          p="md"
-          style={{ position: "absolute", top: 0, right: 0, zIndex: 100 }}
-        >
-          <Tooltip
-            label={colorScheme === "dark" ? t("light") : t("dark")}
-            position="bottom"
-          >
-            <ActionIcon
-              variant="light"
-              size="lg"
-              onClick={toggleColorScheme}
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {colorScheme === "dark" ? (
-                <IconSun size={18} />
-              ) : (
-                <IconMoon size={18} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label={t("language")} position="bottom">
-            <Select
-              value={language}
-              onChange={(value) => value && setLanguage(value as "de" | "en")}
-              data={[
-                { value: "de", label: "🇩🇪 DE" },
-                { value: "en", label: "🇺🇸 EN" },
-              ]}
-              size="sm"
-              variant="filled"
-              w={80}
-              comboboxProps={{
-                zIndex: 999999,
-              }}
-            />
-          </Tooltip>
-        </Group>
-
+      <div style={{ position: "relative" }}>
         <Container
           size={420}
           my={40}
           className="animate-fade-in"
-          style={{ paddingTop: "80px" }}
+          style={{
+            filter: showSettings ? "blur(2px)" : "none",
+            transition: "filter 0.3s ease",
+          }}
         >
+          {/* Settings Button */}
+          <Group justify="flex-end" mb="md">
+            <Tooltip
+              label={language === "de" ? "Einstellungen" : "Settings"}
+              position="bottom"
+            >
+              <ActionIcon
+                variant="light"
+                size="lg"
+                onClick={() => setShowSettings(true)}
+                style={{ transition: "all 0.2s ease" }}
+              >
+                <IconSettings size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+
           {/* Login Form */}
           <Paper withBorder shadow="md" p={30} mt={30} radius="md">
             <Group justify="center" mb="xl">
@@ -145,13 +123,15 @@ export function LoginScreen({ onLogin }: LoginProps) {
                   style={{
                     fontFamily: "Greycliff CF, var(--mantine-font-family)",
                     fontWeight: 900,
-                    color: "var(--mantine-color-text)", // Verwendet Theme-Textfarbe
+                    color: "var(--mantine-color-text)", // Normal text color, not accent
                   }}
                 >
                   Fily - File Browser
                 </Title>
                 <Text c="dimmed" size="sm" ta="center">
-                  {t("signInToContinue")}
+                  {language === "de"
+                    ? "Melden Sie sich an, um fortzufahren"
+                    : "Sign in to continue"}
                 </Text>
               </Stack>
             </Group>
@@ -159,15 +139,19 @@ export function LoginScreen({ onLogin }: LoginProps) {
             <form onSubmit={handleSubmit}>
               <Stack>
                 <TextInput
-                  label={t("username")}
-                  placeholder={t("yourUsername")}
+                  label={language === "de" ? "Benutzername" : "Username"}
+                  placeholder={
+                    language === "de" ? "Ihr Benutzername" : "Your username"
+                  }
                   value={username}
                   onChange={(e) => setUsername(e.currentTarget.value)}
                   required
                 />
                 <PasswordInput
-                  label={t("password")}
-                  placeholder={t("yourPassword")}
+                  label={language === "de" ? "Passwort" : "Password"}
+                  placeholder={
+                    language === "de" ? "Ihr Passwort" : "Your password"
+                  }
                   value={password}
                   onChange={(e) => setPassword(e.currentTarget.value)}
                   required
@@ -180,13 +164,19 @@ export function LoginScreen({ onLogin }: LoginProps) {
                   size="md"
                   style={{ transition: "all 0.2s ease" }}
                 >
-                  {t("login")}
+                  {language === "de" ? "Anmelden" : "Sign in"}
                 </Button>
               </Stack>
             </form>
           </Paper>
         </Container>
-      </Box>
+
+        {/* Settings Modal */}
+        <LoginSettingsModal
+          opened={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      </div>
     </ClientOnly>
   );
 }

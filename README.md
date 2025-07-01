@@ -1,70 +1,70 @@
-# Fily - Moderner File Browser
+# Fily – Modern File Browser Frontend
 
-Ein modernes, benutzerfreundliches File-Management-System gebaut mit Next.js und Mantine UI, das mit einem Java-Backend kommuniziert.
+A modern, user-friendly file management system built with Next.js and Mantine UI, communicating with a Java backend.
 
-## ✨ Features
+## Features
 
-- **🔐 Login-System** - Sichere Authentifizierung (Demo: admin/admin)
-- **📁 Ordner-Navigation** - Intuitive Breadcrumb-Navigation mit Animationen
-- **📤 File-Upload** - Drag & Drop Unterstützung mit Live-Updates
-- **📥 File-Download** - Direkte Downloads
-- **📂 Ordner erstellen** - Neue Ordner anlegen
-- **✏️ Umbenennen** - Dateien und Ordner umbenennen
-- **🗑️ Löschen** - Dateien und Ordner löschen (rekursiv)
-- **📱 Responsive Design** - Mobile-freundliche Benutzeroberfläche
-- **� Theme Customization** - 8 verschiedene Farbschemata wählbar
-- **�🌙 Dark/Light Mode** - Umschaltbar mit Live-Updates
-- **✨ Smooth Animations** - Schöne Hover-Effekte und Übergangsanimationen
-- **💾 Persistente Einstellungen** - Theme-Auswahl wird gespeichert
+- Secure authentication (demo: admin/admin)
+- Folder navigation with breadcrumbs and smooth animations
+- File upload with drag & drop support and live updates
+- Direct file download
+- Create new folders
+- Rename files and folders
+- Delete files and folders (recursive)
+- Responsive design (desktop, tablet, mobile)
+- Customizable color themes (8 presets)
+- Dark/Light mode toggle
+- Persistent settings (theme and color scheme saved)
+- Fast, intuitive UI with transitions and loading indicators
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **UI Framework**: Mantine UI v8
-- **Icons**: Tabler Icons
-- **Backend**: Java (läuft auf localhost:8080)
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **UI Framework:** Mantine UI v8
+- **Icons:** Tabler Icons
+- **Backend:** Java (running on localhost:8080)
 
-## 📋 API-Endpunkte
+## API Endpoints
 
-Das Frontend kommuniziert mit folgenden Backend-Endpunkten:
+The frontend communicates with the following backend endpoints:
 
-| Aktion         | HTTP-Methode | Route                 | Parameter                            | Beschreibung                       |
-| -------------- | ------------ | --------------------- | ------------------------------------ | ---------------------------------- |
-| Inhalt listen  | GET          | `/api/files`          | `?path=ordner/unterordner`           | Zeigt Dateien/Ordner im Zielordner |
-| Upload         | POST         | `/api/files/upload`   | `file` (FormData), `path` (optional) | Datei in Zielordner hochladen      |
-| Download       | GET          | `/api/files/download` | `?path=datei.jpg`                    | Datei herunterladen                |
-| Ordner anlegen | POST         | `/api/files/mkdir`    | `path=ordnername`                    | Neuen Ordner anlegen               |
-| Löschen        | DELETE       | `/api/files`          | `?path=ordner/oderdtei`              | Datei/Ordner löschen (rekursiv)    |
-| Umbenennen     | POST         | `/api/files/rename`   | `oldPath=...`, `newName=...`         | Datei/Ordner umbenennen            |
+| Action        | HTTP Method | Route                 | Parameters                       | Description                       |
+| ------------- | ----------- | --------------------- | -------------------------------- | --------------------------------- |
+| List files    | GET         | `/api/files`          | `?path=folder/subfolder`         | List files and folders            |
+| Upload        | POST        | `/api/files/upload`   | `file` (FormData), `path` (opt.) | Upload file to folder             |
+| Download      | GET         | `/api/files/download` | `?path=filename`                 | Download file or folder           |
+| Create folder | POST        | `/api/files/mkdir`    | `path=foldername`                | Create new folder                 |
+| Delete        | DELETE      | `/api/files`          | `?path=folder/or/file`           | Delete file or folder (recursive) |
+| Rename        | POST        | `/api/files/rename`   | `oldPath=...`, `newName=...`     | Rename file or folder             |
 
-## 🚀 Installation & Start
+## Installation & Setup
 
-### Voraussetzungen
+### Prerequisites
 
-- Node.js (v18 oder höher)
-- Java-Backend läuft auf `localhost:8080`
+- Node.js v18 or later
+- Java backend running on `localhost:8080`
 
-### Installation
+### Setup
 
 ```bash
-# Repository klonen
+# Clone the repository
 git clone [your-repo-url]
 cd fily-frontend
 
-# Dependencies installieren
+# Install dependencies
 npm install
 
-# Development Server starten
+# Start the development server
 npm run dev
 ```
 
-Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
+The app will be available at [http://localhost:3000](http://localhost:3000).
 
-## 🔧 Konfiguration
+## Configuration
 
 ### Next.js Rewrites
 
-Die Anwendung verwendet Next.js Rewrites, um API-Aufrufe an das Java-Backend weiterzuleiten:
+API requests are proxied to the Java backend using Next.js rewrites:
 
 ```typescript
 // next.config.ts
@@ -74,113 +74,57 @@ Die Anwendung verwendet Next.js Rewrites, um API-Aufrufe an das Java-Backend wei
 }
 ```
 
-### Backend-Verbindung
+Update this if your backend runs on a different port.
 
-Das Frontend erwartet, dass das Java-Backend auf `localhost:8080` läuft. Falls das Backend auf einem anderen Port läuft, kann dies in der `next.config.ts` angepasst werden.
+### Theme Configuration
 
-### Theme-Konfiguration
-
-Die Anwendung unterstützt verschiedene Themes:
-
-**Verfügbare Farbschemata:**
-
-- Blau (Standard)
-- Grün
-- Rot
-- Lila
-- Orange
-- Türkis
-- Rosa
-- Cyan
-
-**Theme-Persistenz:**
+- 8 color schemes: blue (default), green, red, purple, orange, teal, pink, cyan
+- Themes and color preferences are saved in `localStorage`
+- Dark/Light mode toggle with instant update
 
 ```typescript
-// Einstellungen werden automatisch im localStorage gespeichert
+// Settings are stored in localStorage
 localStorage.setItem("fily-color-scheme", "dark");
 localStorage.setItem("fily-custom-color", "purple");
 ```
 
-**Live Theme-Updates:**
-Die Theme-Änderungen werden sofort ohne Page-Reload angewendet.
+## Main Components
 
-## 🎨 UI-Komponenten
+- **LoginScreen:** Simple authentication with demo credentials (`admin`/`admin`), error handling, animated background
+- **FileBrowser:** Header navigation, settings, logout, file grid with transitions, modals for upload, create folder, and rename
+- **Settings:** Theme switcher and color picker, persistent preferences
+- **File Operations:** Upload (drag & drop), download, rename, delete, context menu
+- **Responsive UI:** Works on desktop, tablet, and mobile with adaptive layout
 
-### LoginScreen
+## Security
 
-- Einfache Anmeldemaske mit Animationen
-- Demo-Credentials: `admin` / `admin`
-- Validation und Error-Handling
-- Gradient-Hintergrund und Hover-Effekte
+- All API calls routed through Next.js rewrites (no CORS issues)
+- File path validation on the backend
+- Secure file operations and error handling
 
-### FileBrowser
-
-- **Header**: Navigation, Settings-Button und Logout-Button
-- **Sidebar**: Schnellzugriff auf Funktionen mit Hover-Animationen
-- **Main Area**: File-Grid mit Karten-Layout und Stagger-Animationen
-- **Modals**: Upload, Ordner erstellen, Umbenennen mit Slide-Animationen
-
-### Settings
-
-- **Theme Switcher**: Dark/Light Mode mit sofortiger Aktualisierung
-- **Color Picker**: 8 verschiedene Akzentfarben zur Auswahl
-- **Persistent Storage**: Einstellungen werden lokal gespeichert
-
-### File-Operationen
-
-- **Upload**: Drag & Drop mit Mantine Dropzone und Live-Updates
-- **Download**: Automatischer Download-Start
-- **Context Menu**: Rechtsklick-Optionen für jede Datei/Ordner
-- **Hover Effects**: Smooth Card-Animationen und Icon-Skalierung
-
-### Animationen
-
-- **Page Transitions**: Fade-in und Slide-up Animationen
-- **Hover Effects**: Lift-Effekte für Karten und Buttons
-- **Modal Animations**: Slide-up Übergänge für alle Modals
-- **Loading States**: Skeleton-Loading für bessere UX
-
-## 📱 Responsive Design
-
-Die Anwendung ist vollständig responsive und funktioniert auf:
-
-- Desktop (alle Breakpoints)
-- Tablet (kollabierbare Sidebar)
-- Mobile (optimierte Touch-Navigation)
-
-## 🔒 Sicherheit
-
-- Alle API-Aufrufe werden über Next.js Rewrites geleitet
-- CORS-Headers sind konfiguriert
-- File-Path Validation auf Backend-Seite
-- Sichere File-Operationen
-
-## 🚀 Production Build
+## Production Build
 
 ```bash
-# Production Build erstellen
 npm run build
-
-# Production Server starten
 npm start
 ```
 
-## 🤝 Beitragen
+## Contribution
 
-1. Fork das Repository
-2. Erstelle einen Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit deine Änderungen (`git commit -m 'Add some amazing feature'`)
-4. Push zum Branch (`git push origin feature/amazing-feature`)
-5. Öffne einen Pull Request
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to your branch (`git push origin feature/your-feature`)
+5. Open a pull request
 
-## 📄 Lizenz
+## License
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert.
+This project is licensed under the MIT License.
 
-## 🆘 Support
+## Support
 
-Bei Fragen oder Problemen erstelle bitte ein Issue im Repository.
+For questions or issues, please open an issue on GitHub.
 
 ---
 
-**Entwickelt mit ❤️ und modernen Web-Technologien**
+Built with modern web technologies and attention to user experience.

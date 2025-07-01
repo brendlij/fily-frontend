@@ -2,21 +2,24 @@
 
 import {
   Modal,
-  Stack,
   Group,
-  Switch,
-  Select,
-  ColorSwatch,
+  Stack,
   Text,
-  Tooltip,
-  Card,
+  Switch,
+  ColorSwatch,
+  Button,
   Divider,
+  Title,
+  Card,
+  Tooltip,
+  Select,
 } from "@mantine/core";
 import {
   IconMoon,
   IconSun,
-  IconLanguage,
+  IconSettings,
   IconPalette,
+  IconLanguage,
 } from "@tabler/icons-react";
 import { useTheme, CustomColorScheme } from "@/contexts/ThemeContext";
 
@@ -40,7 +43,10 @@ const colorOptions: {
   { value: "cyan", label: { de: "Cyan", en: "Cyan" }, color: "#22b8cf" },
 ];
 
-export function LoginSettingsModal({ opened, onClose }: LoginSettingsModalProps) {
+export function LoginSettingsModal({
+  opened,
+  onClose,
+}: LoginSettingsModalProps) {
   const {
     colorScheme,
     customColor,
@@ -48,94 +54,148 @@ export function LoginSettingsModal({ opened, onClose }: LoginSettingsModalProps)
     toggleColorScheme,
     setCustomColor,
     setLanguage,
+    t,
   } = useTheme();
 
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title={language === "de" ? "Einstellungen" : "Settings"}
-      centered
+      title={
+        <Group>
+          <IconSettings size={20} />
+          <Title order={3}>{t("settingsTitle")}</Title>
+        </Group>
+      }
+      size="md"
+      transitionProps={{
+        transition: "slide-up",
+        duration: 300,
+        timingFunction: "ease-out",
+      }}
       overlayProps={{
         backgroundOpacity: 0.55,
         blur: 3,
       }}
-      size="sm"
+      zIndex={10000}
+      styles={{
+        content: {
+          zIndex: 10001,
+        },
+        overlay: {
+          zIndex: 9999,
+        },
+      }}
     >
-      <Stack gap="md">
+      <Stack gap="lg">
         {/* Theme Toggle */}
-        <Group justify="space-between">
-          <Group gap="xs">
-            {colorScheme === "dark" ? <IconMoon size={16} /> : <IconSun size={16} />}
-            <Text size="sm">
-              {language === "de" ? "Dunkles Design" : "Dark Mode"}
-            </Text>
+        <Card withBorder p="md" className="animate-fade-in">
+          <Group justify="space-between" mb="xs">
+            <Group>
+              {colorScheme === "dark" ? (
+                <IconMoon size={18} />
+              ) : (
+                <IconSun size={18} />
+              )}
+              <Text fw={500}>{t("theme")}</Text>
+            </Group>
+            <Switch
+              checked={colorScheme === "dark"}
+              onChange={toggleColorScheme}
+              size="md"
+              onLabel="🌙"
+              offLabel="☀️"
+            />
           </Group>
-          <Switch
-            checked={colorScheme === "dark"}
-            onChange={toggleColorScheme}
-            size="sm"
-          />
-        </Group>
+          <Text size="sm" c="dimmed">
+            {language === "de"
+              ? "Zwischen hellem und dunklem Modus wechseln"
+              : "Switch between light and dark mode"}
+          </Text>
+        </Card>
 
         <Divider />
 
-        {/* Language Selection */}
-        <Group justify="space-between">
-          <Group gap="xs">
-            <IconLanguage size={16} />
-            <Text size="sm">
-              {language === "de" ? "Sprache" : "Language"}
-            </Text>
+        {/* Color Scheme */}
+        <Card withBorder p="md" className="animate-slide-up">
+          <Group mb="md">
+            <IconPalette size={18} />
+            <Text fw={500}>{t("accentColor")}</Text>
           </Group>
-          <Select
-            data={[
-              { value: "de", label: "Deutsch" },
-              { value: "en", label: "English" },
-            ]}
-            value={language}
-            onChange={(value) => setLanguage(value as "de" | "en")}
-            size="xs"
-            w={100}
-          />
-        </Group>
+          <Text size="sm" c="dimmed" mb="md">
+            {language === "de"
+              ? "Wählen Sie Ihre bevorzugte Akzentfarbe"
+              : "Choose your preferred accent color"}
+          </Text>
 
-        <Divider />
-
-        {/* Color Selection */}
-        <Stack gap="xs">
-          <Group gap="xs">
-            <IconPalette size={16} />
-            <Text size="sm">
-              {language === "de" ? "Akzentfarbe" : "Accent Color"}
-            </Text>
-          </Group>
           <Group gap="xs">
             {colorOptions.map((option) => (
               <Tooltip
                 key={option.value}
                 label={option.label[language]}
-                position="bottom"
+                position="top"
               >
                 <ColorSwatch
                   color={option.color}
-                  size={28}
+                  size={32}
                   style={{
                     cursor: "pointer",
-                    border:
-                      customColor === option.value
-                        ? `2px solid ${option.color}`
-                        : "2px solid transparent",
                     transform:
-                      customColor === option.value ? "scale(1.1)" : "scale(1)",
+                      customColor === option.value ? "scale(1.2)" : "scale(1)",
                     transition: "all 0.2s ease",
+                    border:
+                      customColor === option.value ? "2px solid #000" : "none",
                   }}
                   onClick={() => setCustomColor(option.value)}
                 />
               </Tooltip>
             ))}
           </Group>
-        </Stack>
+        </Card>
+
+        <Divider />
+
+        {/* Language Selection */}
+        <Card withBorder p="md" className="animate-slide-up">
+          <Group mb="md">
+            <IconLanguage size={18} />
+            <Text fw={500}>{t("language")}</Text>
+          </Group>
+          <Text size="sm" c="dimmed" mb="md">
+            {language === "de"
+              ? "Wählen Sie Ihre bevorzugte Sprache"
+              : "Choose your preferred language"}
+          </Text>
+
+          <Select
+            value={language}
+            onChange={(value) => value && setLanguage(value as "de" | "en")}
+            data={[
+              { value: "de", label: t("german") },
+              { value: "en", label: t("english") },
+            ]}
+            size="sm"
+            style={{ maxWidth: 200 }}
+            comboboxProps={{
+              zIndex: 999999,
+            }}
+          />
+        </Card>
+
+        <Divider />
+
+        {/* Info */}
+        <Card withBorder p="md" className="animate-fade-in">
+          <Text size="sm" c="dimmed" ta="center">
+            {t("language") === "de"
+              ? "Alle Änderungen werden automatisch gespeichert"
+              : "All changes are saved automatically"}
+          </Text>
+        </Card>
+
+        <Button onClick={onClose} fullWidth>
+          {language === "de" ? "Schließen" : "Close"}
+        </Button>
       </Stack>
     </Modal>
   );

@@ -14,6 +14,11 @@ export const translations = {
     login: "Anmelden",
     yourUsername: "Ihr Benutzername",
     yourPassword: "Ihr Passwort",
+    signInToContinue: "Melden Sie sich an, um fortzufahren",
+    fillAllFields: "Bitte füllen Sie alle Felder aus",
+    loginSuccessful: "Anmeldung erfolgreich!",
+    invalidCredentials: "Ungültige Anmeldedaten",
+    loginFailed: "Anmeldung fehlgeschlagen",
 
     // Navigation
     home: "Home",
@@ -96,6 +101,16 @@ export const translations = {
     dark: "Dunkel",
     german: "Deutsch",
     english: "English",
+
+    // Color names for tooltips
+    blue: "Blau",
+    green: "Grün",
+    red: "Rot",
+    grape: "Lila",
+    orange: "Orange",
+    teal: "Türkis",
+    pink: "Rosa",
+    cyan: "Cyan",
   },
   en: {
     // Header
@@ -110,6 +125,11 @@ export const translations = {
     login: "Login",
     yourUsername: "Your username",
     yourPassword: "Your password",
+    signInToContinue: "Sign in to continue",
+    fillAllFields: "Please fill in all fields",
+    loginSuccessful: "Login successful!",
+    invalidCredentials: "Invalid credentials",
+    loginFailed: "Login failed",
 
     // Navigation
     home: "Home",
@@ -192,6 +212,16 @@ export const translations = {
     dark: "Dark",
     german: "Deutsch",
     english: "English",
+
+    // Color names for tooltips
+    blue: "Blue",
+    green: "Green",
+    red: "Red",
+    grape: "Purple",
+    orange: "Orange",
+    teal: "Teal",
+    pink: "Pink",
+    cyan: "Cyan",
   },
 } as const;
 
