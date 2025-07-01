@@ -1,36 +1,186 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fily - Moderner File Browser
 
-## Getting Started
+Ein modernes, benutzerfreundliches File-Management-System gebaut mit Next.js und Mantine UI, das mit einem Java-Backend kommuniziert.
 
-First, run the development server:
+## ✨ Features
+
+- **🔐 Login-System** - Sichere Authentifizierung (Demo: admin/admin)
+- **📁 Ordner-Navigation** - Intuitive Breadcrumb-Navigation mit Animationen
+- **📤 File-Upload** - Drag & Drop Unterstützung mit Live-Updates
+- **📥 File-Download** - Direkte Downloads
+- **📂 Ordner erstellen** - Neue Ordner anlegen
+- **✏️ Umbenennen** - Dateien und Ordner umbenennen
+- **🗑️ Löschen** - Dateien und Ordner löschen (rekursiv)
+- **📱 Responsive Design** - Mobile-freundliche Benutzeroberfläche
+- **� Theme Customization** - 8 verschiedene Farbschemata wählbar
+- **�🌙 Dark/Light Mode** - Umschaltbar mit Live-Updates
+- **✨ Smooth Animations** - Schöne Hover-Effekte und Übergangsanimationen
+- **💾 Persistente Einstellungen** - Theme-Auswahl wird gespeichert
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **UI Framework**: Mantine UI v8
+- **Icons**: Tabler Icons
+- **Backend**: Java (läuft auf localhost:8080)
+
+## 📋 API-Endpunkte
+
+Das Frontend kommuniziert mit folgenden Backend-Endpunkten:
+
+| Aktion         | HTTP-Methode | Route                 | Parameter                            | Beschreibung                       |
+| -------------- | ------------ | --------------------- | ------------------------------------ | ---------------------------------- |
+| Inhalt listen  | GET          | `/api/files`          | `?path=ordner/unterordner`           | Zeigt Dateien/Ordner im Zielordner |
+| Upload         | POST         | `/api/files/upload`   | `file` (FormData), `path` (optional) | Datei in Zielordner hochladen      |
+| Download       | GET          | `/api/files/download` | `?path=datei.jpg`                    | Datei herunterladen                |
+| Ordner anlegen | POST         | `/api/files/mkdir`    | `path=ordnername`                    | Neuen Ordner anlegen               |
+| Löschen        | DELETE       | `/api/files`          | `?path=ordner/oderdtei`              | Datei/Ordner löschen (rekursiv)    |
+| Umbenennen     | POST         | `/api/files/rename`   | `oldPath=...`, `newName=...`         | Datei/Ordner umbenennen            |
+
+## 🚀 Installation & Start
+
+### Voraussetzungen
+
+- Node.js (v18 oder höher)
+- Java-Backend läuft auf `localhost:8080`
+
+### Installation
 
 ```bash
+# Repository klonen
+git clone [your-repo-url]
+cd fily-frontend
+
+# Dependencies installieren
+npm install
+
+# Development Server starten
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Die Anwendung ist dann unter `http://localhost:3000` erreichbar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔧 Konfiguration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Next.js Rewrites
 
-## Learn More
+Die Anwendung verwendet Next.js Rewrites, um API-Aufrufe an das Java-Backend weiterzuleiten:
 
-To learn more about Next.js, take a look at the following resources:
+```typescript
+// next.config.ts
+{
+  source: '/api/:path*',
+  destination: 'http://localhost:8080/api/:path*'
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Backend-Verbindung
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Das Frontend erwartet, dass das Java-Backend auf `localhost:8080` läuft. Falls das Backend auf einem anderen Port läuft, kann dies in der `next.config.ts` angepasst werden.
 
-## Deploy on Vercel
+### Theme-Konfiguration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Die Anwendung unterstützt verschiedene Themes:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Verfügbare Farbschemata:**
+
+- Blau (Standard)
+- Grün
+- Rot
+- Lila
+- Orange
+- Türkis
+- Rosa
+- Cyan
+
+**Theme-Persistenz:**
+
+```typescript
+// Einstellungen werden automatisch im localStorage gespeichert
+localStorage.setItem("fily-color-scheme", "dark");
+localStorage.setItem("fily-custom-color", "purple");
+```
+
+**Live Theme-Updates:**
+Die Theme-Änderungen werden sofort ohne Page-Reload angewendet.
+
+## 🎨 UI-Komponenten
+
+### LoginScreen
+
+- Einfache Anmeldemaske mit Animationen
+- Demo-Credentials: `admin` / `admin`
+- Validation und Error-Handling
+- Gradient-Hintergrund und Hover-Effekte
+
+### FileBrowser
+
+- **Header**: Navigation, Settings-Button und Logout-Button
+- **Sidebar**: Schnellzugriff auf Funktionen mit Hover-Animationen
+- **Main Area**: File-Grid mit Karten-Layout und Stagger-Animationen
+- **Modals**: Upload, Ordner erstellen, Umbenennen mit Slide-Animationen
+
+### Settings
+
+- **Theme Switcher**: Dark/Light Mode mit sofortiger Aktualisierung
+- **Color Picker**: 8 verschiedene Akzentfarben zur Auswahl
+- **Persistent Storage**: Einstellungen werden lokal gespeichert
+
+### File-Operationen
+
+- **Upload**: Drag & Drop mit Mantine Dropzone und Live-Updates
+- **Download**: Automatischer Download-Start
+- **Context Menu**: Rechtsklick-Optionen für jede Datei/Ordner
+- **Hover Effects**: Smooth Card-Animationen und Icon-Skalierung
+
+### Animationen
+
+- **Page Transitions**: Fade-in und Slide-up Animationen
+- **Hover Effects**: Lift-Effekte für Karten und Buttons
+- **Modal Animations**: Slide-up Übergänge für alle Modals
+- **Loading States**: Skeleton-Loading für bessere UX
+
+## 📱 Responsive Design
+
+Die Anwendung ist vollständig responsive und funktioniert auf:
+
+- Desktop (alle Breakpoints)
+- Tablet (kollabierbare Sidebar)
+- Mobile (optimierte Touch-Navigation)
+
+## 🔒 Sicherheit
+
+- Alle API-Aufrufe werden über Next.js Rewrites geleitet
+- CORS-Headers sind konfiguriert
+- File-Path Validation auf Backend-Seite
+- Sichere File-Operationen
+
+## 🚀 Production Build
+
+```bash
+# Production Build erstellen
+npm run build
+
+# Production Server starten
+npm start
+```
+
+## 🤝 Beitragen
+
+1. Fork das Repository
+2. Erstelle einen Feature Branch (`git checkout -b feature/amazing-feature`)
+3. Commit deine Änderungen (`git commit -m 'Add some amazing feature'`)
+4. Push zum Branch (`git push origin feature/amazing-feature`)
+5. Öffne einen Pull Request
+
+## 📄 Lizenz
+
+Dieses Projekt ist unter der MIT-Lizenz lizenziert.
+
+## 🆘 Support
+
+Bei Fragen oder Problemen erstelle bitte ein Issue im Repository.
+
+---
+
+**Entwickelt mit ❤️ und modernen Web-Technologien**
