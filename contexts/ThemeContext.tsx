@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { MantineColorScheme } from "@mantine/core";
+import { Language, translations, TranslationKey } from "../lib/translations";
 
 export type CustomColorScheme =
   | "blue"
@@ -22,8 +23,11 @@ export type CustomColorScheme =
 interface ThemeContextType {
   colorScheme: MantineColorScheme;
   customColor: CustomColorScheme;
+  language: Language;
   toggleColorScheme: () => void;
   setCustomColor: (color: CustomColorScheme) => void;
+  setLanguage: (language: Language) => void;
+  t: (key: TranslationKey) => string;
   isHydrated: boolean;
 }
 
@@ -33,6 +37,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [colorScheme, setColorScheme] = useState<MantineColorScheme>("light");
   const [customColor, setCustomColorValue] =
     useState<CustomColorScheme>("blue");
+  const [language, setLanguageValue] = useState<Language>("de");
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -41,6 +46,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       "fily-color-scheme"
     ) as MantineColorScheme;
     let savedColor = localStorage.getItem("fily-custom-color");
+    const savedLanguage = localStorage.getItem("fily-language") as Language;
 
     // Migration: Convert old 'purple' to 'grape'
     if (savedColor === "purple") {
@@ -64,6 +70,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     ) {
       setCustomColorValue(savedColor as CustomColorScheme);
     }
+    if (savedLanguage && ["de", "en"].includes(savedLanguage)) {
+      setLanguageValue(savedLanguage);
+    }
 
     setIsHydrated(true);
   }, []);
@@ -84,13 +93,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setLanguage = (newLanguage: Language) => {
+    setLanguageValue(newLanguage);
+    if (isHydrated) {
+      localStorage.setItem("fily-language", newLanguage);
+    }
+  };
+
+  const t = (key: TranslationKey): string => {
+    return translations[language][key];
+  };
+
   return (
     <ThemeContext.Provider
       value={{
         colorScheme,
         customColor,
+        language,
         toggleColorScheme,
         setCustomColor,
+        setLanguage,
+        t,
         isHydrated,
       }}
     >

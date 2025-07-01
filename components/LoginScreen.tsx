@@ -11,8 +11,15 @@ import {
   Container,
   Group,
   Stack,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconSettings } from "@tabler/icons-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ClientOnly } from "./ClientOnly";
+import FilyLogo from "./FilyLogo";
+import { LoginSettingsModal } from "./LoginSettingsModal";
 
 interface LoginProps {
   onLogin: (credentials: { username: string; password: string }) => void;
@@ -22,14 +29,20 @@ export function LoginScreen({ onLogin }: LoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const { language, t } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username || !password) {
       notifications.show({
-        title: "Fehler",
-        message: "Bitte füllen Sie alle Felder aus",
+        title: t("error"),
+        message:
+          language === "de"
+            ? "Bitte füllen Sie alle Felder aus"
+            : "Please fill in all fields",
         color: "red",
       });
       return;
@@ -43,21 +56,26 @@ export function LoginScreen({ onLogin }: LoginProps) {
       if (username === "admin" && password === "admin") {
         onLogin({ username, password });
         notifications.show({
-          title: "Erfolgreich",
-          message: "Anmeldung erfolgreich!",
+          title: t("success"),
+          message:
+            language === "de" ? "Anmeldung erfolgreich!" : "Login successful!",
           color: "green",
         });
       } else {
         notifications.show({
-          title: "Fehler",
-          message: "Ungültige Anmeldedaten",
+          title: t("error"),
+          message:
+            language === "de"
+              ? "Ungültige Anmeldedaten"
+              : "Invalid credentials",
           color: "red",
         });
       }
     } catch (error) {
       notifications.show({
-        title: "Fehler",
-        message: "Anmeldung fehlgeschlagen",
+        title: t("error"),
+        message:
+          language === "de" ? "Anmeldung fehlgeschlagen" : "Login failed",
         color: "red",
       });
     } finally {
@@ -66,64 +84,98 @@ export function LoginScreen({ onLogin }: LoginProps) {
   };
 
   return (
-    <Container size={420} my={40} className="animate-fade-in">
-      <Title ta="center" mb="xl" className="animate-slide-up">
-        🗂️ Fily - File Browser
-      </Title>
-
-      <Paper
-        withBorder
-        shadow="lg"
-        p={30}
-        mt={30}
-        radius="md"
-        className="animate-slide-up"
-        style={{
-          background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-          border: "1px solid #e9ecef",
-          transition: "all 0.3s ease",
-        }}
-      >
-        <form onSubmit={handleSubmit}>
-          <Stack>
-            <TextInput
-              label="Benutzername"
-              placeholder="Ihr Benutzername"
-              value={username}
-              onChange={(e) => setUsername(e.currentTarget.value)}
-              required
-              style={{ transition: "all 0.2s ease" }}
-            />
-
-            <PasswordInput
-              label="Passwort"
-              placeholder="Ihr Passwort"
-              value={password}
-              onChange={(e) => setPassword(e.currentTarget.value)}
-              required
-              style={{ transition: "all 0.2s ease" }}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              mt="xl"
-              loading={loading}
-              size="md"
-              style={{
-                transition: "all 0.2s ease",
-                background: "linear-gradient(45deg, #339af0 0%, #228be6 100%)",
-              }}
+    <ClientOnly>
+      <div style={{ position: "relative" }}>
+        <Container 
+          size={420} 
+          my={40} 
+          className="animate-fade-in"
+          style={{
+            filter: showSettings ? "blur(2px)" : "none",
+            transition: "filter 0.3s ease",
+          }}
+        >
+          {/* Settings Button */}
+          <Group justify="flex-end" mb="md">
+            <Tooltip
+              label={
+                language === "de" ? "Einstellungen" : "Settings"
+              }
+              position="bottom"
             >
-              Anmelden
-            </Button>
+              <ActionIcon
+                variant="light"
+                size="lg"
+                onClick={() => setShowSettings(true)}
+                style={{ transition: "all 0.2s ease" }}
+              >
+                <IconSettings size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
 
-            <Text size="sm" ta="center" mt="md" c="dimmed">
-              💡 Demo: admin / admin
-            </Text>
-          </Stack>
-        </form>
-      </Paper>
-    </Container>
+          {/* Login Form */}
+          <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+            <Group justify="center" mb="xl">
+              <Stack align="center" gap="xs">
+                <FilyLogo width={60} height={60} />
+                <Title
+                  order={2}
+                  ta="center"
+                  style={{
+                    fontFamily: "Greycliff CF, var(--mantine-font-family)",
+                    fontWeight: 900,
+                    color: "var(--mantine-color-text)", // Normal text color, not accent
+                  }}
+                >
+                  Fily - File Browser
+                </Title>
+                <Text c="dimmed" size="sm" ta="center">
+                  {language === "de" 
+                    ? "Melden Sie sich an, um fortzufahren"
+                    : "Sign in to continue"
+                  }
+                </Text>
+              </Stack>
+            </Group>
+
+            <form onSubmit={handleSubmit}>
+              <Stack>
+                <TextInput
+                  label={language === "de" ? "Benutzername" : "Username"}
+                  placeholder={language === "de" ? "Ihr Benutzername" : "Your username"}
+                  value={username}
+                  onChange={(e) => setUsername(e.currentTarget.value)}
+                  required
+                />
+                <PasswordInput
+                  label={language === "de" ? "Passwort" : "Password"}
+                  placeholder={language === "de" ? "Ihr Passwort" : "Your password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.currentTarget.value)}
+                  required
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  loading={loading}
+                  mt="xl"
+                  size="md"
+                  style={{ transition: "all 0.2s ease" }}
+                >
+                  {language === "de" ? "Anmelden" : "Sign in"}
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+        </Container>
+
+        {/* Settings Modal */}
+        <LoginSettingsModal 
+          opened={showSettings} 
+          onClose={() => setShowSettings(false)} 
+        />
+      </div>
+    </ClientOnly>
   );
 }
