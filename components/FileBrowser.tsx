@@ -484,7 +484,12 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
             />
             <Group gap="sm">
               <FilyLogo width={80} height={80} />
-              <Title order={3}>{t("title")}</Title>
+              <Stack gap={0}>
+                <Title order={3}>Fily</Title>
+                <Text size="xs" c="dimmed">
+                  Organize with a Smile
+                </Text>
+              </Stack>
             </Group>
           </Group>
           <Group>

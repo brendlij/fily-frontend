@@ -30,6 +30,8 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript defaultColorScheme="light" />
         <meta name="color-scheme" content="light dark" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable}`}

@@ -9,6 +9,7 @@ import {
   Title,
   Text,
   Container,
+  Divider,
   Group,
   Stack,
   ActionIcon,
@@ -138,14 +139,24 @@ export function LoginScreen({ onLogin }: LoginProps) {
           />
         </Group>
 
-        <Container size={420} my={40} className="animate-fade-in">
-          <Paper withBorder shadow="md" p={30} radius="md">
+        <Box my={40} className="animate-fade-in" style={{ width: "100%" }}>
+          <Paper
+            withBorder
+            shadow="md"
+            p={50}
+            radius="md"
+            style={{ maxWidth: 600, margin: "0 auto" }}
+          >
             <Group justify="center" mb="xl">
               <Stack align="center" gap="xs">
-                <FilyLogo width={100} height={100} />
+                <FilyLogo width={120} height={120} />
                 <Title order={2} ta="center" style={{ fontWeight: 900 }}>
-                  Fily - File Browser
+                  Fily
                 </Title>
+                <Text size="lg" ta="center" style={{ fontWeight: 600 }}>
+                  Organize with a Smile
+                </Text>
+                <Divider my="sm" mx="auto" w={200} />
                 <Text c="dimmed" size="sm" ta="center">
                   {t("signInToContinue")}
                 </Text>
@@ -180,7 +191,7 @@ export function LoginScreen({ onLogin }: LoginProps) {
               </Stack>
             </form>
           </Paper>
-        </Container>
+        </Box>
       </Box>
     </ClientOnly>
   );

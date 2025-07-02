@@ -3,7 +3,6 @@ export type Language = "de" | "en";
 export const translations = {
   de: {
     // Header
-    title: "Fily - File Browser",
     refresh: "Aktualisieren",
     logout: "Abmelden",
     settings: "Einstellungen",
@@ -114,7 +113,6 @@ export const translations = {
   },
   en: {
     // Header
-    title: "Fily - File Browser",
     refresh: "Refresh",
     logout: "Logout",
     settings: "Settings",
