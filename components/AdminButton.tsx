@@ -16,7 +16,6 @@ export function AdminButton() {
   return (
     <Button
       variant="light"
-      color="blue"
       onClick={() => router.push("/admin")}
       leftSection={<IconUserShield size={14} />}
       style={{
