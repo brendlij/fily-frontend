@@ -1,66 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  AppShell,
-  Burger,
-  Group,
-  Title,
-  Button,
-  Text,
-  Stack,
-  Paper,
-  ActionIcon,
-  Menu,
-  Modal,
-  TextInput,
-  Grid,
-  Card,
-  Badge,
-  Breadcrumbs,
-  Anchor,
-  FileInput,
-  Container,
-  Transition,
-  LoadingOverlay,
-  Tooltip,
-  Progress,
-  Select,
-} from "@mantine/core";
+import { AppShell, Container, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { Dropzone, FileWithPath } from "@mantine/dropzone";
-import {
-  IconFolder,
-  IconFile,
-  IconDotsVertical,
-  IconDownload,
-  IconTrash,
-  IconEdit,
-  IconFolderPlus,
-  IconUpload,
-  IconHome,
-  IconLogout,
-  IconRefresh,
-  IconSortAscending,
-  IconSortDescending,
-} from "@tabler/icons-react";
-import { SettingsButton } from "./SettingsModal";
+import { FileWithPath } from "@mantine/dropzone";
 import { useTheme } from "../contexts/ThemeContext";
-import FilyLogo from "./FilyLogo";
 
-export interface FileItem {
-  name: string;
-  type: "file" | "directory";
-  size?: number;
-  modified?: string;
-}
+// Import components
+import { FileHeader } from "./FileBrowser/FileHeader";
+import { FileToolbar } from "./FileBrowser/FileToolbar";
+import { FileBreadcrumbs } from "./FileBrowser/FileBreadcrumbs";
+import { SortControls } from "./FileBrowser/SortControls";
+import { FileGrid } from "./FileBrowser/FileGrid";
+import { UploadModal } from "./FileBrowser/UploadModal";
+import { NewFolderModal } from "./FileBrowser/NewFolderModal";
+import { RenameModal } from "./FileBrowser/RenameModal";
+import { DeleteModal } from "./FileBrowser/DeleteModal";
+import { ContextMenu } from "./FileBrowser/ContextMenu";
+
+// Import types
+import { FileItem, ContextMenuType } from "./FileBrowser/types";
 
 interface FileBrowserProps {
   onLogout: () => void;
 }
 
 export function FileBrowser({ onLogout }: FileBrowserProps) {
+  // State
   const [opened, { toggle }] = useDisclosure(false);
   const [currentPath, setCurrentPath] = useState("");
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -69,8 +36,6 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
   const [newFolderModalOpened, setNewFolderModalOpened] = useState(false);
   const [renameModalOpened, setRenameModalOpened] = useState(false);
   const [selectedItem, setSelectedItem] = useState<FileItem | null>(null);
-  const [newFolderName, setNewFolderName] = useState("");
-  const [newName, setNewName] = useState("");
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<FileItem | null>(null);
   const [navigationDirection, setNavigationDirection] = useState<
@@ -80,16 +45,14 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [currentUploadFile, setCurrentUploadFile] = useState<string>("");
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    item: FileItem | null;
-  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuType | null>(null);
 
-  const { t, language, sortBy, sortDir, setSortBy, setSortDir } = useTheme();
+  // Get theme settings and translations
+  const { t, sortBy, sortDir, setSortBy, setSortDir } = useTheme();
 
   const pathSegments = currentPath.split("/").filter(Boolean);
 
+  // Effects
   useEffect(() => {
     loadFiles(currentPath, "none");
   }, [currentPath, sortBy, sortDir]);
@@ -101,6 +64,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
+  // Functions for file operations
   const loadFiles = async (
     path: string,
     direction: "forward" | "backward" | "none" = "none"
@@ -155,6 +119,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
           title: t("error"),
           message: t("filesCouldNotLoad"),
           color: "red",
+          position: "bottom-right",
         });
       }
     } catch (error) {
@@ -163,6 +128,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("error"),
         message: t("connectionFailed"),
         color: "red",
+        position: "bottom-right",
       });
     } finally {
       setLoading(false);
@@ -224,6 +190,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
               ? `${t("folder")} "${item.name}" ${t("downloading")}`
               : `${item.name} ${t("downloading")}`,
           color: "green",
+          position: "bottom-right",
         });
       } else {
         notifications.show({
@@ -233,6 +200,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
               ? t("zipDownloadFailed")
               : t("downloadFailed"),
           color: "red",
+          position: "bottom-right",
         });
       }
     } catch (error) {
@@ -240,6 +208,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("error"),
         message: t("downloadFailed"),
         color: "red",
+        position: "bottom-right",
       });
     }
   };
@@ -263,6 +232,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
           title: t("success"),
           message: `${itemToDelete.name} ${t("deleted")}`,
           color: "green",
+          position: "bottom-right",
         });
         setDeleteModalOpened(false);
         setItemToDelete(null);
@@ -273,6 +243,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("error"),
         message: t("deleteFailed"),
         color: "red",
+        position: "bottom-right",
       });
     }
   };
@@ -281,15 +252,6 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     setItemToDelete(item);
     setDeleteModalOpened(true);
     setContextMenu(null);
-  };
-
-  const handleRightClick = (e: React.MouseEvent, item: FileItem) => {
-    e.preventDefault();
-    setContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-      item,
-    });
   };
 
   const handleContextMenu = (e: React.MouseEvent, item: FileItem) => {
@@ -301,7 +263,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     });
   };
 
-  const handleRename = async () => {
+  const handleRename = async (newName: string) => {
     if (!selectedItem || !newName) return;
 
     try {
@@ -324,9 +286,9 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
           title: t("success"),
           message: `${selectedItem.name} ${t("renamed")}`,
           color: "green",
+          position: "bottom-right",
         });
         setRenameModalOpened(false);
-        setNewName("");
         setSelectedItem(null);
         loadFiles(currentPath, "none");
       }
@@ -335,17 +297,16 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("error"),
         message: t("renameFailed"),
         color: "red",
+        position: "bottom-right",
       });
     }
   };
 
-  const handleCreateFolder = async () => {
-    if (!newFolderName) return;
+  const handleCreateFolder = async (name: string) => {
+    if (!name) return;
 
     try {
-      const folderPath = currentPath
-        ? `${currentPath}/${newFolderName}`
-        : newFolderName;
+      const folderPath = currentPath ? `${currentPath}/${name}` : name;
       const response = await fetch(
         `/api/files/mkdir?path=${encodeURIComponent(folderPath)}`,
         {
@@ -356,11 +317,11 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       if (response.ok) {
         notifications.show({
           title: t("success"),
-          message: `${t("folder")} "${newFolderName}" ${t("folderCreated")}`,
+          message: `${t("folder")} "${name}" ${t("folderCreated")}`,
           color: "green",
+          position: "bottom-right",
         });
         setNewFolderModalOpened(false);
-        setNewFolderName("");
         loadFiles(currentPath, "none");
       }
     } catch (error) {
@@ -368,6 +329,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("error"),
         message: t("folderCreateFailed"),
         color: "red",
+        position: "bottom-right",
       });
     }
   };
@@ -391,6 +353,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
             title: t("success"),
             message: `${file.name} ${t("uploaded")}`,
             color: "green",
+            position: "bottom-right",
           });
         }
       } catch (error) {
@@ -398,6 +361,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
           title: t("error"),
           message: `${t("uploadFailed")} ${file.name}`,
           color: "red",
+          position: "bottom-right",
         });
       }
     }
@@ -414,6 +378,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         title: t("uploadCompleted"),
         message: `${successCount} ${t("filesSuccessfullyUploaded")}`,
         color: "blue",
+        position: "bottom-right",
       });
     }
   };
@@ -474,616 +439,102 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Burger
-              opened={opened}
-              onClick={toggle}
-              hiddenFrom="sm"
-              size="sm"
-            />
-            <Group gap="sm">
-              <FilyLogo width={80} height={80} />
-              <Stack gap={0}>
-                <Title order={3}>Fily</Title>
-                <Text size="xs" c="dimmed">
-                  Organize with a Smile
-                </Text>
-              </Stack>
-            </Group>
-          </Group>
-          <Group>
-            <Tooltip label={t("refresh")} position="bottom">
-              <ActionIcon
-                variant="light"
-                size="lg"
-                onClick={() => loadFiles(currentPath, "none")}
-                style={{
-                  transition: "all 0.2s ease",
-                }}
-                className="hover-lift"
-              >
-                <IconRefresh size={18} />
-              </ActionIcon>
-            </Tooltip>
-            <SettingsButton />
-            <Button
-              variant="light"
-              color="red"
-              leftSection={<IconLogout size={14} />}
-              onClick={onLogout}
-              style={{
-                transition: "all 0.2s ease",
-              }}
-            >
-              {t("logout")}
-            </Button>
-          </Group>
-        </Group>
+        <FileHeader
+          opened={opened}
+          toggle={toggle}
+          onLogout={onLogout}
+          onRefresh={() => loadFiles(currentPath, "none")}
+        />
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <Stack gap="md">
-          <Tooltip label={t("toHome")} position="right">
-            <Button
-              leftSection={<IconHome size={14} />}
-              variant="light"
-              onClick={() => navigateToPath("", "backward")}
-              className="enhanced-button"
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {t("home")}
-            </Button>
-          </Tooltip>
-
-          <Tooltip label={t("createNewFolder")} position="right">
-            <Button
-              leftSection={<IconFolderPlus size={14} />}
-              onClick={() => setNewFolderModalOpened(true)}
-              className="enhanced-button"
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {t("newFolder")}
-            </Button>
-          </Tooltip>
-
-          <Tooltip label={t("uploadFiles")} position="right">
-            <Button
-              leftSection={<IconUpload size={14} />}
-              onClick={() => setUploadModalOpened(true)}
-              className="enhanced-button"
-              style={{ transition: "all 0.2s ease" }}
-            >
-              {t("uploadFile")}
-            </Button>
-          </Tooltip>
-        </Stack>
+        <FileToolbar
+          onGoHome={() => navigateToPath("", "backward")}
+          onNewFolder={() => setNewFolderModalOpened(true)}
+          onUpload={() => setUploadModalOpened(true)}
+        />
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Container fluid>
           <Stack>
-            {/* Navigation */}
-            <Group justify="flex-end" align="center" gap="xs">
-              <Text size="sm" c="dimmed">
-                {t("sortBy")}:
-              </Text>
-              <Select
-                value={sortBy}
-                onChange={(value) => setSortBy(value as any)}
-                data={[
-                  { value: "name", label: t("sortName") },
-                  { value: "type", label: t("sortType") },
-                  { value: "modified", label: t("sortModified") },
-                  { value: "size", label: t("sortSize") },
-                ]}
-                size="sm"
-                radius="md"
-                w={160}
-              />
-              <ActionIcon
-                variant="light"
-                color="primary"
-                size="md"
-                radius="md"
-                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-                title={
-                  sortDir === "asc" ? t("sortAscending") : t("sortDescending")
-                }
-              >
-                {sortDir === "asc" ? (
-                  <IconSortAscending size={18} />
-                ) : (
-                  <IconSortDescending size={18} />
-                )}
-              </ActionIcon>
-            </Group>
+            {/* Sort Controls */}
+            <SortControls
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSortByChange={(val) => setSortBy(val)}
+              onSortDirChange={(val) => setSortDir(val)}
+            />
 
-            <Group className="animate-fade-in">
-              {currentPath && (
-                <Tooltip label={t("oneStepBack")} position="bottom">
-                  <Button
-                    variant="light"
-                    size="sm"
-                    onClick={navigateUp}
-                    leftSection={<IconFolder size={14} />}
-                    style={{
-                      transition: "all 0.2s ease",
-                    }}
-                    className="hover-lift"
-                  >
-                    {t("back")}
-                  </Button>
-                </Tooltip>
-              )}
-              <Breadcrumbs separator="›">
-                <Anchor
-                  onClick={() => navigateToPath("", "backward")}
-                  style={{
-                    transition: "all 0.2s ease",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                  className="hover-scale"
-                >
-                  <IconHome size={16} />
-                  <span>Home</span>
-                </Anchor>
-                {pathSegments.map((segment, index) => (
-                  <Anchor
-                    key={index}
-                    onClick={() => {
-                      const targetPath = pathSegments
-                        .slice(0, index + 1)
-                        .join("/");
-                      const isGoingBack =
-                        targetPath.length < currentPath.length;
-                      navigateToPath(
-                        targetPath,
-                        isGoingBack ? "backward" : "forward"
-                      );
-                    }}
-                    style={{ transition: "all 0.2s ease" }}
-                    className="hover-scale"
-                  >
-                    {segment}
-                  </Anchor>
-                ))}
-              </Breadcrumbs>
-            </Group>
+            {/* Navigation Breadcrumbs */}
+            <FileBreadcrumbs
+              currentPath={currentPath}
+              onNavigateUp={navigateUp}
+              onNavigateTo={navigateToPath}
+            />
 
             {/* File Grid */}
-            <Transition
-              mounted={!loading && !isNavigating}
-              transition={{
-                in: {
-                  opacity: 1,
-                  transform:
-                    navigationDirection === "forward"
-                      ? "translateX(0)"
-                      : navigationDirection === "backward"
-                      ? "translateX(0)"
-                      : "translateX(0)",
-                },
-                out: {
-                  opacity: 0,
-                  transform:
-                    navigationDirection === "forward"
-                      ? "translateX(-30px)"
-                      : navigationDirection === "backward"
-                      ? "translateX(30px)"
-                      : "translateX(0)",
-                },
-                common: { transformOrigin: "center" },
-                transitionProperty: "transform, opacity",
+            <FileGrid
+              files={files}
+              currentPath={currentPath}
+              loading={loading}
+              isNavigating={isNavigating}
+              navigationDirection={navigationDirection}
+              onItemClick={handleItemClick}
+              onDownload={handleDownload}
+              onRename={(item) => {
+                setSelectedItem(item);
+                setRenameModalOpened(true);
               }}
-              duration={300}
-              timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
-            >
-              {(styles) => (
-                <div style={styles}>
-                  <LoadingOverlay visible={loading} />
-                  <Grid>
-                    {files.map((item, index) => (
-                      <Grid.Col
-                        key={`${currentPath}-${item.name}-${index}`}
-                        span={{ base: 6, sm: 4, md: 3, lg: 3 }}
-                      >
-                        <Card
-                          key={item.name}
-                          p="md"
-                          withBorder
-                          className="hover-lift"
-                          style={{
-                            cursor: "pointer",
-                            transition: "all 0.2s ease",
-                            minHeight: "160px",
-                            height: "160px",
-                            display: "flex",
-                            flexDirection: "column",
-                            backgroundColor:
-                              item.type === "directory"
-                                ? "var(--mantine-color-blue-0)"
-                                : undefined,
-                            borderColor:
-                              item.type === "directory"
-                                ? "var(--mantine-color-blue-3)"
-                                : undefined,
-                          }}
-                          onClick={() => handleItemClick(item)}
-                          onContextMenu={(e) => handleRightClick(e, item)}
-                        >
-                          <Group justify="space-between" mb="sm">
-                            <Group gap="sm">
-                              {item.type === "directory" ? (
-                                <IconFolder
-                                  size={32}
-                                  style={{
-                                    color:
-                                      "var(--mantine-primary-color-filled)",
-                                  }}
-                                />
-                              ) : (
-                                <IconFile size={32} />
-                              )}
-                              <div style={{ flex: 1 }}>
-                                <Text size="sm" fw={500} lineClamp={2}>
-                                  {item.name}
-                                </Text>
-                              </div>
-                            </Group>
-                            <Menu shadow="md" width={200} position="bottom-end">
-                              <Menu.Target>
-                                <ActionIcon
-                                  variant="subtle"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <IconDotsVertical size={16} />
-                                </ActionIcon>
-                              </Menu.Target>
-                              <Menu.Dropdown>
-                                <Menu.Item
-                                  leftSection={<IconDownload size={14} />}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDownload(item);
-                                  }}
-                                  style={{
-                                    color: "var(--mantine-color-text)",
-                                    height: "36px",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  {item.type === "directory"
-                                    ? t("downloadAsZip")
-                                    : t("download")}
-                                </Menu.Item>
-                                <Menu.Item
-                                  leftSection={<IconEdit size={14} />}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedItem(item);
-                                    setNewName(item.name);
-                                    setRenameModalOpened(true);
-                                  }}
-                                  style={{
-                                    color: "var(--mantine-color-text)",
-                                    height: "36px",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  {t("rename")}
-                                </Menu.Item>
-                                <Menu.Item
-                                  leftSection={<IconTrash size={14} />}
-                                  color="red"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    confirmDelete(item);
-                                  }}
-                                  style={{
-                                    height: "36px",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  {t("delete")}
-                                </Menu.Item>
-                              </Menu.Dropdown>
-                            </Menu>
-                          </Group>
-
-                          <div style={{ marginTop: "auto" }}>
-                            <Group justify="space-between" mb="xs">
-                              <Badge
-                                variant="light"
-                                size="sm"
-                                color={
-                                  item.type === "directory" ? "blue" : "gray"
-                                }
-                              >
-                                {item.type === "directory"
-                                  ? t("folder")
-                                  : t("file")}
-                              </Badge>
-                              {item.type === "file" && item.size && (
-                                <Text size="xs" c="dimmed">
-                                  {formatFileSize(item.size)}
-                                </Text>
-                              )}
-                            </Group>
-
-                            {item.modified && (
-                              <Text
-                                size="xs"
-                                c="dimmed"
-                                style={{
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {item.modified}
-                              </Text>
-                            )}
-                          </div>
-                        </Card>
-                      </Grid.Col>
-                    ))}
-                  </Grid>
-                </div>
-              )}
-            </Transition>
+              onDelete={confirmDelete}
+              onContextMenu={handleContextMenu}
+              formatFileSize={formatFileSize}
+            />
           </Stack>
         </Container>
 
-        {/* Upload Modal */}
-        <Modal
+        {/* Modals */}
+        <UploadModal
           opened={uploadModalOpened}
-          onClose={() => !isUploading && setUploadModalOpened(false)}
-          title={t("uploadFilesModal")}
-          transitionProps={{
-            transition: "slide-up",
-            duration: 300,
-            timingFunction: "ease-out",
-          }}
-          closeOnClickOutside={!isUploading}
-          closeOnEscape={!isUploading}
-        >
-          <Stack>
-            {isUploading ? (
-              <Stack>
-                <Text size="sm" c="dimmed" ta="center">
-                  {currentUploadFile &&
-                    `${t("uploading")}: ${currentUploadFile}`}
-                </Text>
-                <Progress
-                  value={uploadProgress}
-                  size="lg"
-                  radius="md"
-                  animated
-                  color="blue"
-                  style={{ transition: "all 0.3s ease" }}
-                />
-                <Text size="xs" c="dimmed" ta="center">
-                  {uploadProgress}% {t("completed")}
-                </Text>
-              </Stack>
-            ) : (
-              <Dropzone
-                onDrop={handleUpload}
-                multiple
-                style={{
-                  transition: "all 0.2s ease",
-                  border: "2px dashed var(--mantine-primary-color-4)",
-                  borderRadius: "var(--mantine-radius-md)",
-                  backgroundColor: "var(--mantine-color-gray-0)",
-                  padding: "2rem",
-                }}
-                styles={{
-                  inner: {
-                    pointerEvents: "all",
-                  },
-                }}
-              >
-                <Group justify="center" mb="md">
-                  <IconUpload
-                    size={32}
-                    color="var(--mantine-primary-color-6)"
-                  />
-                </Group>
-                <Text ta="center" size="lg" mb="md" fw={500}>
-                  {t("dragDropFiles")}
-                </Text>
-                <Text ta="center" size="sm" c="dimmed">
-                  {t("multipleSupported")}
-                </Text>
-              </Dropzone>
-            )}
-          </Stack>
-        </Modal>
+          onClose={() => setUploadModalOpened(false)}
+          onUpload={handleUpload}
+          isUploading={isUploading}
+          uploadProgress={uploadProgress}
+          currentUploadFile={currentUploadFile}
+        />
 
-        {/* New Folder Modal */}
-        <Modal
+        <NewFolderModal
           opened={newFolderModalOpened}
           onClose={() => setNewFolderModalOpened(false)}
-          title={t("createNewFolderTitle")}
-          transitionProps={{
-            transition: "slide-up",
-            duration: 300,
-            timingFunction: "ease-out",
-          }}
-        >
-          <Stack>
-            <TextInput
-              label={t("folderName")}
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.currentTarget.value)}
-              placeholder={t("enterFolderName")}
-              data-autofocus
-            />
-            <Group justify="flex-end">
-              <Button
-                variant="subtle"
-                onClick={() => setNewFolderModalOpened(false)}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleCreateFolder}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("create")}
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+          onCreateFolder={handleCreateFolder}
+        />
 
-        {/* Rename Modal */}
-        <Modal
+        <RenameModal
           opened={renameModalOpened}
           onClose={() => setRenameModalOpened(false)}
-          title={t("renameTitle")}
-          transitionProps={{
-            transition: "slide-up",
-            duration: 300,
-            timingFunction: "ease-out",
-          }}
-        >
-          <Stack>
-            <TextInput
-              label={t("newName")}
-              value={newName}
-              onChange={(e) => setNewName(e.currentTarget.value)}
-              placeholder={t("enterNewName")}
-              data-autofocus
-            />
-            <Group justify="flex-end">
-              <Button
-                variant="subtle"
-                onClick={() => setRenameModalOpened(false)}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleRename}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("rename")}
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+          initialName={selectedItem?.name || ""}
+          onRename={handleRename}
+        />
 
-        {/* Delete Confirmation Modal */}
-        <Modal
+        <DeleteModal
           opened={deleteModalOpened}
           onClose={() => setDeleteModalOpened(false)}
-          title={t("confirmDelete")}
-          transitionProps={{
-            transition: "slide-up",
-            duration: 300,
-            timingFunction: "ease-out",
+          item={itemToDelete}
+          onDelete={handleDelete}
+        />
+
+        {/* Context Menu */}
+        <ContextMenu
+          contextMenu={contextMenu}
+          onDownload={handleDownload}
+          onRename={(item) => {
+            setSelectedItem(item);
+            setRenameModalOpened(true);
           }}
-        >
-          <Stack>
-            <Text>
-              Möchten Sie <strong>"{itemToDelete?.name}"</strong>{" "}
-              {t("deleteConfirmation")}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {itemToDelete?.type === "directory"
-                ? t("deleteWarningFolder")
-                : t("deleteWarningFile")}
-            </Text>
-            <Group justify="flex-end">
-              <Button
-                variant="subtle"
-                onClick={() => setDeleteModalOpened(false)}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                color="red"
-                onClick={handleDelete}
-                style={{ transition: "all 0.2s ease" }}
-              >
-                {t("delete")}
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+          onDelete={confirmDelete}
+          onClose={() => setContextMenu(null)}
+        />
       </AppShell.Main>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <Menu
-          opened
-          withArrow
-          withinPortal={false}
-          closeOnItemClick={false}
-          position="bottom" // Pflicht, wird ignoriert durch styles
-          styles={{
-            dropdown: {
-              position: "fixed",
-              top: contextMenu.y,
-              left: contextMenu.x,
-              transform: "none", // verhindert zentrierung
-              zIndex: 1000,
-              minWidth: 200,
-            },
-          }}
-        >
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconDownload size={14} />}
-              onClick={() => {
-                if (contextMenu.item) {
-                  handleDownload(contextMenu.item);
-                  setContextMenu(null);
-                }
-              }}
-            >
-              {contextMenu.item?.type === "directory"
-                ? t("downloadAsZip")
-                : t("download")}
-            </Menu.Item>
-
-            <Menu.Item
-              leftSection={<IconEdit size={14} />}
-              onClick={() => {
-                if (contextMenu.item) {
-                  setSelectedItem(contextMenu.item);
-                  setNewName(contextMenu.item.name);
-                  setRenameModalOpened(true);
-                  setContextMenu(null);
-                }
-              }}
-            >
-              {t("rename")}
-            </Menu.Item>
-
-            <Menu.Item
-              leftSection={<IconTrash size={14} />}
-              color="red"
-              onClick={() => {
-                if (contextMenu.item) {
-                  confirmDelete(contextMenu.item);
-                  setContextMenu(null);
-                }
-              }}
-            >
-              {t("delete")}
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      )}
     </AppShell>
   );
 }
