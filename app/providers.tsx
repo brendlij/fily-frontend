@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { MantineProvider, createTheme, MantineTheme } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import useAuthStore from "@/store/useAuthStore";
 
 function MantineThemeProvider({ children }: { children: React.ReactNode }) {
   const { colorScheme, customColor, isHydrated } = useTheme();
@@ -131,10 +133,23 @@ function MantineThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+  const { loadUserFromToken } = useAuthStore();
+
+  // Try to load user from token in localStorage on first render
+  useEffect(() => {
+    loadUserFromToken();
+  }, [loadUserFromToken]);
+
+  return <>{children}</>;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <MantineThemeProvider>{children}</MantineThemeProvider>
+      <MantineThemeProvider>
+        <AuthInitializer>{children}</AuthInitializer>
+      </MantineThemeProvider>
     </ThemeProvider>
   );
 }

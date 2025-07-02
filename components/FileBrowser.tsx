@@ -64,6 +64,57 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
+  // Check token validity on component mount
+  useEffect(() => {
+    const checkTokenValidity = () => {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        onLogout();
+        return;
+      }
+
+      try {
+        // Parse the JWT token (without verification)
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          window
+            .atob(base64)
+            .split("")
+            .map((c) => {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+
+        const payload = JSON.parse(jsonPayload);
+
+        // Check if token has expired
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          notifications.show({
+            title: t("error"),
+            message: t("sessionExpired"),
+            color: "red",
+            position: "bottom-right",
+          });
+          onLogout();
+        }
+      } catch (error) {
+        // If there's any error parsing the token, consider it invalid
+        console.error("Error checking token validity:", error);
+        onLogout();
+      }
+    };
+
+    // Check on mount
+    checkTokenValidity();
+
+    // And check periodically
+    const intervalId = setInterval(checkTokenValidity, 60000); // Every minute
+
+    return () => clearInterval(intervalId);
+  }, [onLogout, t]);
+
   // Functions for file operations
   const loadFiles = async (
     path: string,
@@ -78,9 +129,28 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     }
 
     try {
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(
-        `/api/files?path=${encodeURIComponent(path)}`
+        `${baseUrl}/files?path=${encodeURIComponent(path)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      // Handle 401 Unauthorized - token expired or invalid
+      if (response.status === 401) {
+        notifications.show({
+          title: t("error"),
+          message: t("sessionExpired"),
+          color: "red",
+          position: "bottom-right",
+        });
+        onLogout();
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         const transformedFiles = data.map((item: any) => ({
@@ -164,8 +234,15 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
   const handleDownload = async (item: FileItem) => {
     try {
       const filePath = currentPath ? `${currentPath}/${item.name}` : item.name;
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(
-        `/api/files/download?path=${encodeURIComponent(filePath)}`
+        `${baseUrl}/files/download?path=${encodeURIComponent(filePath)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.ok) {
@@ -220,10 +297,15 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       const filePath = currentPath
         ? `${currentPath}/${itemToDelete.name}`
         : itemToDelete.name;
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(
-        `/api/files?path=${encodeURIComponent(filePath)}`,
+        `${baseUrl}/files?path=${encodeURIComponent(filePath)}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -271,15 +353,21 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         ? `${currentPath}/${selectedItem.name}`
         : selectedItem.name;
 
-      // Java-Backend erwartet FormData-Parameter, nicht JSON
-      const formData = new FormData();
-      formData.append("oldPath", oldPath);
-      formData.append("newName", newName);
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
-      const response = await fetch("/api/files/rename", {
-        method: "POST",
-        body: formData,
-      });
+      // According to documentation, rename uses query parameters
+      const response = await fetch(
+        `${baseUrl}/files/rename?oldPath=${encodeURIComponent(
+          oldPath
+        )}&newName=${encodeURIComponent(newName)}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         notifications.show({
@@ -307,10 +395,15 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
     try {
       const folderPath = currentPath ? `${currentPath}/${name}` : name;
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const response = await fetch(
-        `/api/files/mkdir?path=${encodeURIComponent(folderPath)}`,
+        `${baseUrl}/files/mkdir?path=${encodeURIComponent(folderPath)}`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -419,7 +512,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         reject(new Error("Upload failed"));
       });
 
-      xhr.open("POST", "/api/files/upload");
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      xhr.open("POST", `${baseUrl}/files/upload`);
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
       xhr.send(formData);
     });
   };

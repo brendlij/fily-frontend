@@ -16,17 +16,28 @@ export const translations = {
     sortDescending: "Absteigend",
     sortBy: "Sortieren nach",
 
-    // Login
+    // Login & Registration
     username: "Benutzername",
     password: "Passwort",
+    confirmPassword: "Passwort bestätigen",
     login: "Anmelden",
     yourUsername: "Ihr Benutzername",
     yourPassword: "Ihr Passwort",
+    confirmYourPassword: "Passwort wiederholen",
+    passwordMismatch: "Passwörter stimmen nicht überein",
     signInToContinue: "Melden Sie sich an, um fortzufahren",
     fillAllFields: "Bitte füllen Sie alle Felder aus",
     loginSuccessful: "Anmeldung erfolgreich!",
+    registrationSuccessful: "Registrierung erfolgreich!",
+    registrationNotAllowed:
+      "Registrierung nicht erlaubt, da bereits Benutzer existieren",
+    createdAsAdmin: "Sie wurden als Administrator-Benutzer angelegt!",
+    registrationSuccessLoginFailed:
+      "Registrierung erfolgreich, aber automatischer Login fehlgeschlagen. Bitte manuell anmelden.",
     invalidCredentials: "Ungültige Anmeldedaten",
     loginFailed: "Anmeldung fehlgeschlagen",
+    serverConnectionFailed:
+      "Verbindung zum Server fehlgeschlagen. Bitte überprüfen Sie, ob der Server läuft.",
 
     // Navigation
     home: "Home",
@@ -76,6 +87,7 @@ export const translations = {
 
     // Messages
     success: "Erfolg",
+    warning: "Hinweis",
     error: "Fehler",
     filesCouldNotLoad: "Dateien konnten nicht geladen werden",
     connectionFailed: "Verbindung zum Server fehlgeschlagen",
@@ -119,6 +131,10 @@ export const translations = {
     teal: "Türkis",
     pink: "Rosa",
     cyan: "Cyan",
+
+    // Auth
+    sessionExpired:
+      "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
   },
   en: {
     // Header
@@ -135,17 +151,27 @@ export const translations = {
     sortDescending: "Descending",
     sortBy: "Sort by",
 
-    // Login
+    // Login & Registration
     username: "Username",
     password: "Password",
+    confirmPassword: "Confirm Password",
     login: "Login",
     yourUsername: "Your username",
     yourPassword: "Your password",
+    confirmYourPassword: "Confirm your password",
+    passwordMismatch: "Passwords do not match",
     signInToContinue: "Sign in to continue",
     fillAllFields: "Please fill in all fields",
     loginSuccessful: "Login successful!",
+    registrationSuccessful: "Registration successful!",
+    registrationNotAllowed: "Registration not allowed as users already exist",
+    createdAsAdmin: "You have been created as an admin user!",
+    registrationSuccessLoginFailed:
+      "Registration successful, but automatic login failed. Please log in manually.",
     invalidCredentials: "Invalid credentials",
     loginFailed: "Login failed",
+    serverConnectionFailed:
+      "Failed to connect to server. Please check if the server is running.",
 
     // Navigation
     home: "Home",
@@ -195,6 +221,7 @@ export const translations = {
 
     // Messages
     success: "Success",
+    warning: "Note",
     error: "Error",
     filesCouldNotLoad: "Files could not be loaded",
     connectionFailed: "Connection to server failed",
@@ -238,6 +265,9 @@ export const translations = {
     teal: "Teal",
     pink: "Pink",
     cyan: "Cyan",
+
+    // Auth
+    sessionExpired: "Your session has expired. Please log in again.",
   },
   fr: {
     // Header
@@ -254,17 +284,29 @@ export const translations = {
     sortDescending: "Décroissant",
     sortBy: "Trier par",
 
-    // Login
+    // Login & Registration
     username: "Nom d'utilisateur",
     password: "Mot de passe",
+    confirmPassword: "Confirmer le mot de passe",
     login: "Connexion",
     yourUsername: "Votre nom d'utilisateur",
     yourPassword: "Votre mot de passe",
+    confirmYourPassword: "Confirmer votre mot de passe",
+    passwordMismatch: "Les mots de passe ne correspondent pas",
     signInToContinue: "Connectez-vous pour continuer",
     fillAllFields: "Veuillez remplir tous les champs",
     loginSuccessful: "Connexion réussie !",
+    registrationSuccessful: "Inscription réussie !",
+    registrationNotAllowed:
+      "Inscription non autorisée car des utilisateurs existent déjà",
+    createdAsAdmin:
+      "Vous avez été créé en tant qu'utilisateur administrateur !",
+    registrationSuccessLoginFailed:
+      "Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.",
     invalidCredentials: "Identifiants invalides",
     loginFailed: "Échec de la connexion",
+    serverConnectionFailed:
+      "Échec de la connexion au serveur. Veuillez vérifier si le serveur est en cours d'exécution.",
 
     // Navigation
     home: "Accueil",
@@ -314,6 +356,7 @@ export const translations = {
 
     // Messages
     success: "Succès",
+    warning: "Remarque",
     error: "Erreur",
     filesCouldNotLoad: "Impossible de charger les fichiers",
     connectionFailed: "La connexion au serveur a échoué",
@@ -357,6 +400,9 @@ export const translations = {
     teal: "Turquoise",
     pink: "Rose",
     cyan: "Cyan",
+
+    // Auth
+    sessionExpired: "Votre session a expiré. Veuillez vous reconnecter.",
   },
 } as const;
 

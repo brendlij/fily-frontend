@@ -1,29 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { LoginScreen } from "@/components/LoginScreen";
 import { FileBrowser } from "@/components/FileBrowser";
+import { AuthGuard } from "@/components/AuthGuard";
+import useAuthStore from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<{
-    username: string;
-    password: string;
-  } | null>(null);
-
-  const handleLogin = (credentials: { username: string; password: string }) => {
-    setUser(credentials);
-    setIsLoggedIn(true);
-  };
+  const { logout } = useAuthStore();
+  const router = useRouter();
 
   const handleLogout = () => {
-    setUser(null);
-    setIsLoggedIn(false);
+    logout();
+    router.push("/login");
   };
 
-  if (!isLoggedIn) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
-
-  return <FileBrowser onLogout={handleLogout} />;
+  return (
+    <AuthGuard requireAuth>
+      <FileBrowser onLogout={handleLogout} />
+    </AuthGuard>
+  );
 }

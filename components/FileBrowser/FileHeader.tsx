@@ -19,6 +19,7 @@ import { Burger } from "@mantine/core";
 import { useTheme } from "../../contexts/ThemeContext";
 import FilyLogo from "../FilyLogo";
 import { SettingsButton } from "../SettingsModal";
+import { AdminButton } from "../AdminButton";
 
 interface FileHeaderProps {
   opened: boolean;
@@ -84,6 +85,7 @@ export function FileHeader({
           </ActionIcon>
         </Tooltip>
         <SettingsButton />
+        <AdminButton />
         <Button
           variant="light"
           color="red"

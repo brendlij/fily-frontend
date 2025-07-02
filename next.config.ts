@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       {
         source: "/api/:path*",
         destination: "http://localhost:8080/api/:path*",
+        basePath: false,
       },
     ];
   },
@@ -24,11 +25,21 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Access-Control-Allow-Headers",
-            value: "Content-Type",
+            value: "Content-Type, Authorization, X-Requested-With",
+          },
+          {
+            key: "Access-Control-Allow-Credentials",
+            value: "true",
           },
         ],
       },
     ];
+  },
+  // Add more detailed logging for debugging
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 };
 
