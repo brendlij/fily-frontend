@@ -8,6 +8,33 @@ import {
   IconFile,
   IconFolder,
   IconTrash,
+  IconFileTypePdf,
+  IconFileTypeJpg,
+  IconFileTypePng,
+  IconFileTypeDoc,
+  IconGif,
+  IconFileWord,
+  IconFileExcel,
+  IconFileTypeTxt,
+  IconFileTypeDocx,
+  IconFileTypeXls,
+  IconFileTypeZip,
+  IconFileTypeCsv,
+  IconJson,
+  IconHtml,
+  IconFileTypeTsx,
+  IconFileTypeTs,
+  IconFileTypePpt,
+  IconFileTypeJs,
+  IconFileTypePhp,
+  IconFileTypeXml,
+  IconFileTypeJsx,
+  IconFileTypeVue,
+  IconFileTypeRs,
+  IconFileTypeCss,
+  IconFileTypeBmp,
+  IconFileTypeSvg,
+  IconFileTypeSql,
 } from "@tabler/icons-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { FileItem } from "./types";
@@ -22,6 +49,36 @@ interface FileCardProps {
   formatFileSize: (bytes: number) => string;
 }
 
+const iconMap: Record<string, React.ReactNode> = {
+  pdf: <IconFileTypePdf size={32} color="#e02f2f" />,
+  jpg: <IconFileTypeJpg size={32} color="#f07c00" />,
+  jpeg: <IconFileTypeJpg size={32} color="#f07c00" />,
+  png: <IconFileTypePng size={32} color="#2a9df4" />,
+  doc: <IconFileTypeDoc size={32} color="#185abd" />,
+  docx: <IconFileTypeDocx size={32} color="#185abd" />,
+  gif: <IconGif size={32} color="#eae311" />,
+  xls: <IconFileTypeXls size={32} color="#207245" />,
+  xlsx: <IconFileTypeXls size={32} color="#207245" />,
+  csv: <IconFileTypeCsv size={32} color="#207245" />,
+  zip: <IconFileTypeZip size={32} color="#666666" />,
+  txt: <IconFileTypeTxt size={32} color="#999999" />,
+  json: <IconJson size={32} color="#f89406" />,
+  html: <IconHtml size={32} color="#e34f26" />,
+  ts: <IconFileTypeTs size={32} color="#3178c6" />,
+  tsx: <IconFileTypeTsx size={32} color="#3178c6" />,
+  js: <IconFileTypeJs size={32} color="#f7df1e" />,
+  jsx: <IconFileTypeJsx size={32} color="#61dafb" />,
+  css: <IconFileTypeCss size={32} color="#2965f1" />,
+  php: <IconFileTypePhp size={32} color="#777bb3" />,
+  xml: <IconFileTypeXml size={32} color="#0060ac" />,
+  ppt: <IconFileTypePpt size={32} color="#d24726" />,
+  vue: <IconFileTypeVue size={32} color="#42b883" />,
+  rs: <IconFileTypeRs size={32} color="#dea584" />,
+  bmp: <IconFileTypeBmp size={32} color="#999999" />,
+  svg: <IconFileTypeSvg size={32} color="#ffb13b" />,
+  sql: <IconFileTypeSql size={32} color="#d2691e" />,
+};
+
 export function FileCard({
   item,
   onItemClick,
@@ -33,6 +90,14 @@ export function FileCard({
 }: FileCardProps) {
   const { t } = useTheme();
 
+  const ext =
+    item.type === "file" && item.name
+      ? item.name.split(".").pop()?.toLowerCase()
+      : null;
+
+  const iconForExt =
+    ext && iconMap[ext] ? iconMap[ext] : <IconFile size={32} />;
+
   return (
     <Card
       p="md"
@@ -41,42 +106,38 @@ export function FileCard({
       style={{
         cursor: "pointer",
         transition: "all 0.2s ease",
-        minHeight: "160px",
-        height: "160px",
+        minHeight: 160,
+        height: 160,
         display: "flex",
         flexDirection: "column",
+        position: "relative",
         backgroundColor:
-          item.type === "directory" ? "var(--mantine-color-blue-0)" : undefined,
+          item.type === "directory"
+            ? "var(--mantine-color-primary-filled)"
+            : undefined,
         borderColor:
-          item.type === "directory" ? "var(--mantine-color-blue-3)" : undefined,
+          item.type === "directory"
+            ? "var(--mantine-primary-color-filled)"
+            : undefined,
       }}
       onClick={() => onItemClick(item)}
       onContextMenu={(e) => onContextMenu(e, item)}
     >
-      <Group justify="space-between" mb="sm">
-        <Group gap="sm">
-          {item.type === "directory" ? (
-            <IconFolder
-              size={32}
-              style={{ color: "var(--mantine-primary-color-filled)" }}
-            />
-          ) : (
-            <IconFile size={32} />
-          )}
-          <div style={{ flex: 1 }}>
-            <Text size="sm" fw={500} lineClamp={2}>
-              {item.name}
-            </Text>
-          </div>
-        </Group>
+      {/* 3-Punkte-Icon oben rechts */}
+      <div
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 10,
+        }}
+      >
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
             <ActionIcon
               variant="subtle"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
             >
               <IconDotsVertical size={16} />
             </ActionIcon>
@@ -90,7 +151,7 @@ export function FileCard({
               }}
               style={{
                 color: "var(--mantine-color-text)",
-                height: "36px",
+                height: 36,
                 fontSize: "0.875rem",
               }}
             >
@@ -104,7 +165,7 @@ export function FileCard({
               }}
               style={{
                 color: "var(--mantine-color-text)",
-                height: "36px",
+                height: 36,
                 fontSize: "0.875rem",
               }}
             >
@@ -117,26 +178,64 @@ export function FileCard({
                 e.stopPropagation();
                 onDelete(item);
               }}
-              style={{
-                height: "36px",
-                fontSize: "0.875rem",
-              }}
+              style={{ height: 36, fontSize: "0.875rem" }}
             >
               {t("delete")}
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
+      </div>
+
+      <Group mb="sm" gap="sm" style={{ alignItems: "center" }}>
+        {item.type === "directory" ? (
+          <IconFolder
+            size={32}
+            style={{ color: "var(--mantine-primary-color-filled)" }}
+          />
+        ) : (
+          iconForExt
+        )}
+        <Text
+          size="sm"
+          fw={500}
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "calc(100% - 40px)",
+          }}
+          title={item.name}
+        >
+          {item.name}
+        </Text>
       </Group>
 
       <div style={{ marginTop: "auto" }}>
-        <Group justify="space-between" mb="xs">
-          <Badge
-            variant="light"
-            size="sm"
-            color={item.type === "directory" ? "blue" : "gray"}
-          >
-            {item.type === "directory" ? t("folder") : t("file")}
-          </Badge>
+        <Group justify="space-between" mb="xs" align="center" gap="xs">
+          <Group gap={6}>
+            <Badge
+              variant="light"
+              size="sm"
+              color={
+                item.type === "directory"
+                  ? "var(--mantine-primary-color-filled)"
+                  : "gray"
+              }
+            >
+              {item.type === "directory" ? t("folder") : t("file")}
+            </Badge>
+            {ext && (
+              <Badge
+                variant="outline"
+                size="sm"
+                color="violet"
+                style={{ textTransform: "uppercase" }}
+              >
+                {ext}
+              </Badge>
+            )}
+          </Group>
+
           {item.type === "file" && item.size && (
             <Text size="xs" c="dimmed">
               {formatFileSize(item.size)}

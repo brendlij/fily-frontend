@@ -4,6 +4,7 @@ export interface FileItem {
   type: "file" | "directory";
   size?: number;
   modified?: string;
+  path: string; // relativer Pfad zur Datei
 }
 
 export interface ContextMenuType {

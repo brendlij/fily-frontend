@@ -155,6 +155,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         const data = await response.json();
         const transformedFiles = data.map((item: any) => ({
           name: item.name,
+          path: item.path,
           type: item.isDirectory ? "directory" : "file",
           size: item.size,
           modified: item.lastModified
@@ -574,9 +575,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
               files={files}
               currentPath={currentPath}
               loading={loading}
+              setCurrentPath={setCurrentPath}
               isNavigating={isNavigating}
               navigationDirection={navigationDirection}
-              onItemClick={handleItemClick}
+              //onItemClick={handleItemClick}
               onDownload={handleDownload}
               onRename={(item) => {
                 setSelectedItem(item);

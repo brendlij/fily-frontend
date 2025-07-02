@@ -5,9 +5,10 @@ import {
   Title,
   Text,
   ActionIcon,
-  Button,
   Tooltip,
   Stack,
+  Menu,
+  Avatar,
 } from "@mantine/core";
 import {
   IconLogout,
@@ -20,6 +21,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import FilyLogo from "../FilyLogo";
 import { SettingsButton } from "../SettingsModal";
 import { AdminButton } from "../AdminButton";
+import useAuthStore from "@/store/useAuthStore";
 
 interface FileHeaderProps {
   opened: boolean;
@@ -35,6 +37,15 @@ export function FileHeader({
   onRefresh,
 }: FileHeaderProps) {
   const { t, colorScheme, toggleColorScheme } = useTheme();
+  const username = useAuthStore((state) => state.username) || "User";
+
+  // Initialen aus Username (erste 2 Buchstaben, groß)
+  const initials = username
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <Group h="100%" px="md" justify="space-between">
@@ -86,17 +97,38 @@ export function FileHeader({
         </Tooltip>
         <SettingsButton />
         <AdminButton />
-        <Button
-          variant="light"
-          color="red"
-          leftSection={<IconLogout size={14} />}
-          onClick={onLogout}
-          style={{
-            transition: "all 0.2s ease",
-          }}
-        >
-          {t("logout")}
-        </Button>
+
+        {/* User Avatar mit Menü */}
+        <Menu withArrow position="bottom-end" shadow="md">
+          <Menu.Target>
+            <ActionIcon
+              size={40}
+              variant="default"
+              radius="xl"
+              style={{ cursor: "pointer" }}
+            >
+              <Avatar
+                radius="xl"
+                color="gray"
+                size={30}
+                style={{ lineHeight: 1 }}
+              >
+                {initials}
+              </Avatar>
+            </ActionIcon>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Label>{username}</Menu.Label>
+            <Menu.Item
+              leftSection={<IconLogout size={16} />}
+              color="red"
+              onClick={onLogout}
+            >
+              {t("logout")}
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Group>
     </Group>
   );

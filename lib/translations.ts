@@ -68,6 +68,10 @@ export const translations = {
     renameTitle: "Umbenennen",
     confirmDelete: "Löschen bestätigen",
 
+    fileViewer: "Datei Betrachter",
+    fileCouldNotLoad: "Datei konnte nicht geladen werden",
+    invalidJsonFormat: "Ungültiges JSON-Format",
+    unsupportedFileType: "Nicht unterstützter Dateityp",
     // Form labels
     folderName: "Ordnername",
     newName: "Neuer Name",
