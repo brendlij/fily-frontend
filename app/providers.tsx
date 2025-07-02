@@ -125,7 +125,7 @@ function MantineThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <MantineProvider theme={theme} forceColorScheme={forceColorScheme}>
-      <Notifications position="top-right" autoClose={4000} />
+      <Notifications position="bottom-right" autoClose={4000} />
       {children}
     </MantineProvider>
   );

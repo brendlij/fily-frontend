@@ -25,6 +25,7 @@ import {
   LoadingOverlay,
   Tooltip,
   Progress,
+  Select,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -41,6 +42,8 @@ import {
   IconHome,
   IconLogout,
   IconRefresh,
+  IconSortAscending,
+  IconSortDescending,
 } from "@tabler/icons-react";
 import { SettingsButton } from "./SettingsModal";
 import { useTheme } from "../contexts/ThemeContext";
@@ -83,13 +86,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     item: FileItem | null;
   } | null>(null);
 
-  const { t, language } = useTheme();
+  const { t, language, sortBy, sortDir, setSortBy, setSortDir } = useTheme();
 
   const pathSegments = currentPath.split("/").filter(Boolean);
 
   useEffect(() => {
     loadFiles(currentPath, "none");
-  }, []);
+  }, [currentPath, sortBy, sortDir]);
 
   // Close context menu when clicking elsewhere
   useEffect(() => {
@@ -106,7 +109,6 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     setNavigationDirection(direction);
     setLoading(true);
 
-    // Kurze Verzögerung für smooth animation start
     if (direction !== "none") {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -117,17 +119,37 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       );
       if (response.ok) {
         const data = await response.json();
-        // Java-Backend gibt direkt ein Array zurück
-        // Transformiere die Backend-Daten in das Frontend-Format
         const transformedFiles = data.map((item: any) => ({
           name: item.name,
           type: item.isDirectory ? "directory" : "file",
           size: item.size,
           modified: item.lastModified
-            ? new Date(item.lastModified).toLocaleDateString("de-DE")
+            ? new Date(item.lastModified).toISOString()
             : undefined,
         }));
-        setFiles(transformedFiles);
+
+        const sorted = [...transformedFiles].sort((a, b) => {
+          let valA = a[sortBy];
+          let valB = b[sortBy];
+
+          // Leere Felder nach hinten sortieren
+          if (valA === undefined) return 1;
+          if (valB === undefined) return -1;
+
+          if (typeof valA === "string" && typeof valB === "string") {
+            return sortDir === "asc"
+              ? valA.localeCompare(valB)
+              : valB.localeCompare(valA);
+          }
+
+          if (typeof valA === "number" && typeof valB === "number") {
+            return sortDir === "asc" ? valA - valB : valB - valA;
+          }
+
+          return 0;
+        });
+
+        setFiles(sorted);
       } else {
         notifications.show({
           title: t("error"),
@@ -144,7 +166,6 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
       });
     } finally {
       setLoading(false);
-      // Animation completion delay
       setTimeout(() => {
         setIsNavigating(false);
         setNavigationDirection("none");
@@ -260,6 +281,15 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
     setItemToDelete(item);
     setDeleteModalOpened(true);
     setContextMenu(null);
+  };
+
+  const handleRightClick = (e: React.MouseEvent, item: FileItem) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      item,
+    });
   };
 
   const handleContextMenu = (e: React.MouseEvent, item: FileItem) => {
@@ -439,7 +469,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 100 }}
       navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
       padding="md"
     >
@@ -453,7 +483,7 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
               size="sm"
             />
             <Group gap="sm">
-              <FilyLogo width={32} height={32} />
+              <FilyLogo width={80} height={80} />
               <Title order={3}>{t("title")}</Title>
             </Group>
           </Group>
@@ -529,6 +559,39 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
         <Container fluid>
           <Stack>
             {/* Navigation */}
+            <Group justify="flex-end" align="center" gap="xs">
+              <Text size="sm" c="dimmed">
+                Sortieren:
+              </Text>
+              <Select
+                value={sortBy}
+                onChange={(value) => setSortBy(value as any)}
+                data={[
+                  { value: "name", label: "Name" },
+                  { value: "type", label: "Typ" },
+                  { value: "modified", label: "Geändert" },
+                  { value: "size", label: "Größe" },
+                ]}
+                size="sm"
+                radius="md"
+                w={160}
+              />
+              <ActionIcon
+                variant="light"
+                color="primary"
+                size="md"
+                radius="md"
+                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+                title={sortDir === "asc" ? "Aufsteigend" : "Absteigend"}
+              >
+                {sortDir === "asc" ? (
+                  <IconSortAscending size={18} />
+                ) : (
+                  <IconSortDescending size={18} />
+                )}
+              </ActionIcon>
+            </Group>
+
             <Group className="animate-fade-in">
               {currentPath && (
                 <Tooltip label={t("oneStepBack")} position="bottom">
@@ -618,85 +681,62 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                     {files.map((item, index) => (
                       <Grid.Col
                         key={`${currentPath}-${item.name}-${index}`}
-                        span={{ base: 12, sm: 6, md: 4, lg: 3 }}
+                        span={{ base: 6, sm: 4, md: 3, lg: 3 }}
                       >
                         <Card
-                          shadow="sm"
-                          padding="lg"
-                          radius="md"
+                          key={item.name}
+                          p="md"
                           withBorder
-                          className="animate-slide-up"
+                          className="hover-lift"
                           style={{
-                            cursor:
-                              item.type === "directory" ? "pointer" : "default",
-                            animationDelay: `${index * 0.05}s`,
-                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                            transform: "translateY(0)",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            minHeight: "160px",
                             height: "160px",
                             display: "flex",
                             flexDirection: "column",
+                            backgroundColor:
+                              item.type === "directory"
+                                ? "var(--mantine-color-blue-0)"
+                                : undefined,
+                            borderColor:
+                              item.type === "directory"
+                                ? "var(--mantine-color-blue-3)"
+                                : undefined,
                           }}
-                          onMouseEnter={(e) => {
-                            if (!isNavigating) {
-                              e.currentTarget.style.transform =
-                                "translateY(-4px)";
-                              e.currentTarget.style.boxShadow =
-                                "0 8px 25px rgba(0, 0, 0, 0.15)";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isNavigating) {
-                              e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.boxShadow = "";
-                            }
-                          }}
-                          onClick={() =>
-                            !isNavigating &&
-                            item.type === "directory" &&
-                            handleItemClick(item)
-                          }
-                          onContextMenu={(e) => handleContextMenu(e, item)}
+                          onClick={() => handleItemClick(item)}
+                          onContextMenu={(e) => handleRightClick(e, item)}
                         >
-                          <Group
-                            justify="space-between"
-                            mb="xs"
-                            style={{ minHeight: "32px" }}
-                          >
-                            <Group style={{ flex: 1, minWidth: 0 }}>
+                          <Group justify="space-between" mb="sm">
+                            <Group gap="sm">
                               {item.type === "directory" ? (
-                                <IconFolder size={24} color="blue" />
+                                <IconFolder
+                                  size={32}
+                                  style={{
+                                    color:
+                                      "var(--mantine-primary-color-filled)",
+                                  }}
+                                />
                               ) : (
-                                <IconFile size={24} />
+                                <IconFile size={32} />
                               )}
-                              <Text
-                                fw={500}
-                                style={{
-                                  cursor:
-                                    item.type === "directory"
-                                      ? "pointer"
-                                      : "inherit",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  flex: 1,
-                                  minWidth: 0,
-                                }}
-                                title={item.name} // Tooltip für vollständigen Namen
-                              >
-                                {item.name}
-                              </Text>
+                              <div style={{ flex: 1 }}>
+                                <Text size="sm" fw={500} lineClamp={2}>
+                                  {item.name}
+                                </Text>
+                              </div>
                             </Group>
-
-                            <Menu position="bottom-end">
+                            <Menu shadow="md" width={200} position="bottom-end">
                               <Menu.Target>
-                                <Tooltip label={t("actions")} position="left">
-                                  <ActionIcon
-                                    variant="subtle"
-                                    onClick={(e) => e.stopPropagation()} // Verhindert Navigation beim Klick auf Menü
-                                  >
-                                    <IconDotsVertical size={16} />
-                                  </ActionIcon>
-                                </Tooltip>
+                                <ActionIcon
+                                  variant="subtle"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <IconDotsVertical size={16} />
+                                </ActionIcon>
                               </Menu.Target>
                               <Menu.Dropdown>
                                 <Menu.Item
@@ -704,6 +744,11 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDownload(item);
+                                  }}
+                                  style={{
+                                    color: "var(--mantine-color-text)",
+                                    height: "36px",
+                                    fontSize: "0.875rem",
                                   }}
                                 >
                                   {item.type === "directory"
@@ -718,6 +763,11 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                     setNewName(item.name);
                                     setRenameModalOpened(true);
                                   }}
+                                  style={{
+                                    color: "var(--mantine-color-text)",
+                                    height: "36px",
+                                    fontSize: "0.875rem",
+                                  }}
                                 >
                                   {t("rename")}
                                 </Menu.Item>
@@ -728,6 +778,10 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                                     e.stopPropagation();
                                     confirmDelete(item);
                                   }}
+                                  style={{
+                                    height: "36px",
+                                    fontSize: "0.875rem",
+                                  }}
                                 >
                                   {t("delete")}
                                 </Menu.Item>
@@ -735,36 +789,40 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                             </Menu>
                           </Group>
 
-                          <Group
-                            justify="space-between"
-                            style={{ marginTop: "auto" }}
-                          >
-                            <Badge variant="light" size="sm">
-                              {item.type === "directory"
-                                ? t("folder")
-                                : t("file")}
-                            </Badge>
-                            {item.size && (
-                              <Text size="sm" c="dimmed">
-                                {formatFileSize(item.size)}
+                          <div style={{ marginTop: "auto" }}>
+                            <Group justify="space-between" mb="xs">
+                              <Badge
+                                variant="light"
+                                size="sm"
+                                color={
+                                  item.type === "directory" ? "blue" : "gray"
+                                }
+                              >
+                                {item.type === "directory"
+                                  ? t("folder")
+                                  : t("file")}
+                              </Badge>
+                              {item.type === "file" && item.size && (
+                                <Text size="xs" c="dimmed">
+                                  {formatFileSize(item.size)}
+                                </Text>
+                              )}
+                            </Group>
+
+                            {item.modified && (
+                              <Text
+                                size="xs"
+                                c="dimmed"
+                                style={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {item.modified}
                               </Text>
                             )}
-                          </Group>
-
-                          {item.modified && (
-                            <Text
-                              size="xs"
-                              c="dimmed"
-                              mt="xs"
-                              style={{
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {item.modified}
-                            </Text>
-                          )}
+                          </div>
                         </Card>
                       </Grid.Col>
                     ))}
@@ -958,22 +1016,25 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
 
       {/* Context Menu */}
       {contextMenu && (
-        <Paper
-          style={{
-            position: "fixed",
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 1000,
-            minWidth: "180px",
-            padding: "0.25rem",
+        <Menu
+          opened
+          withArrow
+          withinPortal={false}
+          closeOnItemClick={false}
+          position="bottom" // Pflicht, wird ignoriert durch styles
+          styles={{
+            dropdown: {
+              position: "fixed",
+              top: contextMenu.y,
+              left: contextMenu.x,
+              transform: "none", // verhindert zentrierung
+              zIndex: 1000,
+              minWidth: 200,
+            },
           }}
-          shadow="md"
-          withBorder
         >
-          <Stack gap={2}>
-            <Button
-              variant="subtle"
-              size="xs"
+          <Menu.Dropdown>
+            <Menu.Item
               leftSection={<IconDownload size={14} />}
               onClick={() => {
                 if (contextMenu.item) {
@@ -981,20 +1042,13 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                   setContextMenu(null);
                 }
               }}
-              style={{
-                justifyContent: "flex-start",
-                height: "32px",
-                fontSize: "0.875rem",
-              }}
-              fullWidth
             >
               {contextMenu.item?.type === "directory"
                 ? t("downloadAsZip")
                 : t("download")}
-            </Button>
-            <Button
-              variant="subtle"
-              size="xs"
+            </Menu.Item>
+
+            <Menu.Item
               leftSection={<IconEdit size={14} />}
               onClick={() => {
                 if (contextMenu.item) {
@@ -1004,36 +1058,24 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                   setContextMenu(null);
                 }
               }}
-              style={{
-                justifyContent: "flex-start",
-                height: "32px",
-                fontSize: "0.875rem",
-              }}
-              fullWidth
             >
               {t("rename")}
-            </Button>
-            <Button
-              variant="subtle"
-              size="xs"
+            </Menu.Item>
+
+            <Menu.Item
               leftSection={<IconTrash size={14} />}
               color="red"
               onClick={() => {
                 if (contextMenu.item) {
                   confirmDelete(contextMenu.item);
+                  setContextMenu(null);
                 }
               }}
-              style={{
-                justifyContent: "flex-start",
-                height: "32px",
-                fontSize: "0.875rem",
-              }}
-              fullWidth
             >
               {t("delete")}
-            </Button>
-          </Stack>
-        </Paper>
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       )}
     </AppShell>
   );

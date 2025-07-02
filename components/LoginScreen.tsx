@@ -13,12 +13,12 @@ import {
   Stack,
   ActionIcon,
   Tooltip,
-  Switch,
   Select,
   Box,
+  useMantineTheme,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconMoon, IconSun, IconLanguage } from "@tabler/icons-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ClientOnly } from "./ClientOnly";
 import FilyLogo from "./FilyLogo";
@@ -34,6 +34,7 @@ export function LoginScreen({ onLogin }: LoginProps) {
 
   const { language, t, colorScheme, toggleColorScheme, setLanguage } =
     useTheme();
+  const theme = useMantineTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +51,6 @@ export function LoginScreen({ onLogin }: LoginProps) {
     setLoading(true);
 
     try {
-      // Hier würde normalerweise die Authentifizierung stattfinden
-      // Für Demo-Zwecke akzeptieren wir admin/admin
       if (username === "admin" && password === "admin") {
         onLogin({ username, password });
         notifications.show({
@@ -83,24 +82,31 @@ export function LoginScreen({ onLogin }: LoginProps) {
         style={{
           minHeight: "100vh",
           background: "var(--mantine-color-body)",
-          color: "var(--mantine-color-text)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
         }}
       >
-        {/* Settings Header Bar */}
+        {/* Header Controls */}
         <Group
           justify="flex-end"
-          p="md"
-          style={{ position: "absolute", top: 0, right: 0, zIndex: 100 }}
+          style={{ position: "absolute", top: 16, right: 16, gap: 12 }}
         >
           <Tooltip
             label={colorScheme === "dark" ? t("light") : t("dark")}
             position="bottom"
           >
             <ActionIcon
-              variant="light"
-              size="lg"
+              variant="filled"
+              color={`var(--mantine-primary-color-filled)`}
               onClick={toggleColorScheme}
-              style={{ transition: "all 0.2s ease" }}
+              size="lg"
+              style={{
+                backgroundColor: `var(--mantine-primary-color-filled)`,
+                color: "white",
+              }}
             >
               {colorScheme === "dark" ? (
                 <IconSun size={18} />
@@ -110,44 +116,34 @@ export function LoginScreen({ onLogin }: LoginProps) {
             </ActionIcon>
           </Tooltip>
 
-          <Tooltip label={t("language")} position="bottom">
-            <Select
-              value={language}
-              onChange={(value) => value && setLanguage(value as "de" | "en")}
-              data={[
-                { value: "de", label: "🇩🇪 DE" },
-                { value: "en", label: "🇺🇸 EN" },
-              ]}
-              size="sm"
-              variant="filled"
-              w={80}
-              comboboxProps={{
+          <Select
+            value={language}
+            onChange={(value) => value && setLanguage(value as "de" | "en")}
+            data={[
+              { value: "de", label: "🇩🇪 DE" },
+              { value: "en", label: "🇺🇸 EN" },
+            ]}
+            size="sm"
+            variant="filled"
+            styles={{
+              input: {
+                backgroundColor:
+                  colorScheme === "dark" ? theme.colors.dark[5] : undefined,
+                color: colorScheme === "dark" ? theme.white : undefined,
+              },
+              dropdown: {
                 zIndex: 999999,
-              }}
-            />
-          </Tooltip>
+              },
+            }}
+          />
         </Group>
 
-        <Container
-          size={420}
-          my={40}
-          className="animate-fade-in"
-          style={{ paddingTop: "80px" }}
-        >
-          {/* Login Form */}
-          <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <Container size={420} my={40} className="animate-fade-in">
+          <Paper withBorder shadow="md" p={30} radius="md">
             <Group justify="center" mb="xl">
               <Stack align="center" gap="xs">
-                <FilyLogo width={60} height={60} />
-                <Title
-                  order={2}
-                  ta="center"
-                  style={{
-                    fontFamily: "Greycliff CF, var(--mantine-font-family)",
-                    fontWeight: 900,
-                    color: "var(--mantine-color-text)", // Verwendet Theme-Textfarbe
-                  }}
-                >
+                <FilyLogo width={100} height={100} />
+                <Title order={2} ta="center" style={{ fontWeight: 900 }}>
                   Fily - File Browser
                 </Title>
                 <Text c="dimmed" size="sm" ta="center">
@@ -178,7 +174,6 @@ export function LoginScreen({ onLogin }: LoginProps) {
                   loading={loading}
                   mt="xl"
                   size="md"
-                  style={{ transition: "all 0.2s ease" }}
                 >
                   {t("login")}
                 </Button>

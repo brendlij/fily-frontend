@@ -24,9 +24,13 @@ interface ThemeContextType {
   colorScheme: MantineColorScheme;
   customColor: CustomColorScheme;
   language: Language;
+  sortBy: "name" | "type" | "modified" | "size";
+  sortDir: "asc" | "desc";
   toggleColorScheme: () => void;
   setCustomColor: (color: CustomColorScheme) => void;
   setLanguage: (language: Language) => void;
+  setSortBy: (val: "name" | "type" | "modified" | "size") => void;
+  setSortDir: (val: "asc" | "desc") => void;
   t: (key: TranslationKey) => string;
   isHydrated: boolean;
 }
@@ -38,6 +42,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [customColor, setCustomColorValue] =
     useState<CustomColorScheme>("blue");
   const [language, setLanguageValue] = useState<Language>("de");
+  const [sortBy, setSortByValue] = useState<
+    "name" | "type" | "modified" | "size"
+  >("name");
+  const [sortDir, setSortDirValue] = useState<"asc" | "desc">("asc");
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -47,6 +55,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     ) as MantineColorScheme;
     let savedColor = localStorage.getItem("fily-custom-color");
     const savedLanguage = localStorage.getItem("fily-language") as Language;
+    const savedSortBy = localStorage.getItem(
+      "fily-sort-by"
+    ) as ThemeContextType["sortBy"];
+    const savedSortDir = localStorage.getItem(
+      "fily-sort-dir"
+    ) as ThemeContextType["sortDir"];
 
     // Migration: Convert old 'purple' to 'grape'
     if (savedColor === "purple") {
@@ -72,6 +86,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     if (savedLanguage && ["de", "en"].includes(savedLanguage)) {
       setLanguageValue(savedLanguage);
+    }
+    if (
+      savedSortBy &&
+      ["name", "type", "modified", "size"].includes(savedSortBy)
+    ) {
+      setSortByValue(savedSortBy);
+    }
+    if (savedSortDir && ["asc", "desc"].includes(savedSortDir)) {
+      setSortDirValue(savedSortDir);
     }
 
     setIsHydrated(true);
@@ -100,6 +123,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setSortBy = (val: ThemeContextType["sortBy"]) => {
+    setSortByValue(val);
+    if (isHydrated) {
+      localStorage.setItem("fily-sort-by", val);
+    }
+  };
+
+  const setSortDir = (val: ThemeContextType["sortDir"]) => {
+    setSortDirValue(val);
+    if (isHydrated) {
+      localStorage.setItem("fily-sort-dir", val);
+    }
+  };
+
   const t = (key: TranslationKey): string => {
     return translations[language][key];
   };
@@ -113,6 +150,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         toggleColorScheme,
         setCustomColor,
         setLanguage,
+        sortBy,
+        sortDir,
+        setSortBy,
+        setSortDir,
         t,
         isHydrated,
       }}
