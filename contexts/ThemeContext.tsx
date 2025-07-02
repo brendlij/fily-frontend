@@ -84,7 +84,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     ) {
       setCustomColorValue(savedColor as CustomColorScheme);
     }
-    if (savedLanguage && ["de", "en"].includes(savedLanguage)) {
+    if (savedLanguage && ["de", "en", "fr"].includes(savedLanguage)) {
       setLanguageValue(savedLanguage);
     }
     if (

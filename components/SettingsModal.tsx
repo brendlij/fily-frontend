@@ -24,6 +24,7 @@ import {
   IconLanguage,
 } from "@tabler/icons-react";
 import { useTheme, CustomColorScheme } from "@/contexts/ThemeContext";
+import { Language } from "../lib/translations";
 import { ClientOnly } from "./ClientOnly";
 
 interface SettingsModalProps {
@@ -33,17 +34,49 @@ interface SettingsModalProps {
 
 const colorOptions: {
   value: CustomColorScheme;
-  label: { de: string; en: string };
+  label: { de: string; en: string; fr: string };
   color: string;
 }[] = [
-  { value: "blue", label: { de: "Blau", en: "Blue" }, color: "#339af0" },
-  { value: "green", label: { de: "Grün", en: "Green" }, color: "#51cf66" },
-  { value: "red", label: { de: "Rot", en: "Red" }, color: "#ff6b6b" },
-  { value: "grape", label: { de: "Lila", en: "Purple" }, color: "#cc5de8" },
-  { value: "orange", label: { de: "Orange", en: "Orange" }, color: "#ff922b" },
-  { value: "teal", label: { de: "Türkis", en: "Teal" }, color: "#20c997" },
-  { value: "pink", label: { de: "Rosa", en: "Pink" }, color: "#f06595" },
-  { value: "cyan", label: { de: "Cyan", en: "Cyan" }, color: "#22b8cf" },
+  {
+    value: "blue",
+    label: { de: "Blau", en: "Blue", fr: "Bleu" },
+    color: "#339af0",
+  },
+  {
+    value: "green",
+    label: { de: "Grün", en: "Green", fr: "Vert" },
+    color: "#51cf66",
+  },
+  {
+    value: "red",
+    label: { de: "Rot", en: "Red", fr: "Rouge" },
+    color: "#ff6b6b",
+  },
+  {
+    value: "grape",
+    label: { de: "Lila", en: "Purple", fr: "Violet" },
+    color: "#cc5de8",
+  },
+  {
+    value: "orange",
+    label: { de: "Orange", en: "Orange", fr: "Orange" },
+    color: "#ff922b",
+  },
+  {
+    value: "teal",
+    label: { de: "Türkis", en: "Teal", fr: "Turquoise" },
+    color: "#20c997",
+  },
+  {
+    value: "pink",
+    label: { de: "Rosa", en: "Pink", fr: "Rose" },
+    color: "#f06595",
+  },
+  {
+    value: "cyan",
+    label: { de: "Cyan", en: "Cyan", fr: "Cyan" },
+    color: "#22b8cf",
+  },
 ];
 
 export function SettingsModal({ opened, onClose }: SettingsModalProps) {
@@ -97,6 +130,8 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
           <Text size="sm" c="dimmed">
             {language === "de"
               ? "Zwischen hellem und dunklem Modus wechseln"
+              : language === "fr"
+              ? "Basculer entre les modes clair et sombre"
               : "Switch between light and dark mode"}
           </Text>
         </Card>
@@ -112,6 +147,8 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
           <Text size="sm" c="dimmed" mb="md">
             {language === "de"
               ? "Wählen Sie Ihre bevorzugte Akzentfarbe"
+              : language === "fr"
+              ? "Choisissez votre couleur d'accent préférée"
               : "Choose your preferred accent color"}
           </Text>
 
@@ -151,15 +188,18 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
           <Text size="sm" c="dimmed" mb="md">
             {language === "de"
               ? "Wählen Sie Ihre bevorzugte Sprache"
+              : language === "fr"
+              ? "Choisissez votre langue préférée"
               : "Choose your preferred language"}
           </Text>
 
           <Select
             value={language}
-            onChange={(value) => value && setLanguage(value as "de" | "en")}
+            onChange={(value) => value && setLanguage(value as Language)}
             data={[
               { value: "de", label: t("german") },
               { value: "en", label: t("english") },
+              { value: "fr", label: "Français" },
             ]}
             size="sm"
             style={{ maxWidth: 200 }}
@@ -178,7 +218,11 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
         </Card>
 
         <Button onClick={onClose} fullWidth>
-          {language === "de" ? "Schließen" : "Close"}
+          {language === "de"
+            ? "Schließen"
+            : language === "fr"
+            ? "Fermer"
+            : "Close"}
         </Button>
       </Stack>
     </Modal>

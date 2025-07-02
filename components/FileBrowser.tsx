@@ -566,16 +566,16 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
             {/* Navigation */}
             <Group justify="flex-end" align="center" gap="xs">
               <Text size="sm" c="dimmed">
-                Sortieren:
+                {t("sortBy")}:
               </Text>
               <Select
                 value={sortBy}
                 onChange={(value) => setSortBy(value as any)}
                 data={[
-                  { value: "name", label: "Name" },
-                  { value: "type", label: "Typ" },
-                  { value: "modified", label: "Geändert" },
-                  { value: "size", label: "Größe" },
+                  { value: "name", label: t("sortName") },
+                  { value: "type", label: t("sortType") },
+                  { value: "modified", label: t("sortModified") },
+                  { value: "size", label: t("sortSize") },
                 ]}
                 size="sm"
                 radius="md"
@@ -587,7 +587,9 @@ export function FileBrowser({ onLogout }: FileBrowserProps) {
                 size="md"
                 radius="md"
                 onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-                title={sortDir === "asc" ? "Aufsteigend" : "Absteigend"}
+                title={
+                  sortDir === "asc" ? t("sortAscending") : t("sortDescending")
+                }
               >
                 {sortDir === "asc" ? (
                   <IconSortAscending size={18} />

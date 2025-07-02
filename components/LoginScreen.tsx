@@ -21,6 +21,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Language } from "../lib/translations";
 import { ClientOnly } from "./ClientOnly";
 import FilyLogo from "./FilyLogo";
 
@@ -119,10 +120,11 @@ export function LoginScreen({ onLogin }: LoginProps) {
 
           <Select
             value={language}
-            onChange={(value) => value && setLanguage(value as "de" | "en")}
+            onChange={(value) => value && setLanguage(value as Language)}
             data={[
               { value: "de", label: "🇩🇪 DE" },
               { value: "en", label: "🇺🇸 EN" },
+              { value: "fr", label: "🇫🇷 FR" },
             ]}
             size="sm"
             variant="filled"
