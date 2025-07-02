@@ -21,8 +21,9 @@ import {
   IconPalette,
   IconLanguage,
 } from "@tabler/icons-react";
-import { useTheme, CustomColorScheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Language } from "../lib/translations";
+import type { CustomColorScheme } from "../store/useSettingsStore";
 
 interface LoginSettingsModalProps {
   opened: boolean;

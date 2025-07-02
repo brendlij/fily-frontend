@@ -35,6 +35,7 @@ import {
   IconFileTypeBmp,
   IconFileTypeSvg,
   IconFileTypeSql,
+  IconMovie,
 } from "@tabler/icons-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { FileItem } from "./types";
@@ -77,6 +78,8 @@ const iconMap: Record<string, React.ReactNode> = {
   bmp: <IconFileTypeBmp size={32} color="#999999" />,
   svg: <IconFileTypeSvg size={32} color="#ffb13b" />,
   sql: <IconFileTypeSql size={32} color="#d2691e" />,
+  mp4: <IconMovie size={32} color="#f00" />,
+  avi: <IconMovie size={32} color="#f00" />,
 };
 
 export function FileCard({

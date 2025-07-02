@@ -22,10 +22,15 @@ import {
   IconSettings,
   IconPalette,
   IconLanguage,
+  IconSearch,
 } from "@tabler/icons-react";
-import { useTheme, CustomColorScheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Language } from "../lib/translations";
 import { ClientOnly } from "./ClientOnly";
+import {
+  useSettingsStore,
+  type CustomColorScheme,
+} from "../store/useSettingsStore";
 
 interface SettingsModalProps {
   opened: boolean;
@@ -89,6 +94,13 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
     setLanguage,
     t,
   } = useTheme();
+  // Direkter Zugriff auf den Store ohne Selector-Funktion vermeidet Unendliche Schleifen
+  const fuzzySearchEnabled = useSettingsStore(
+    (state) => state.fuzzySearchEnabled
+  );
+  const setFuzzySearchEnabled = useSettingsStore(
+    (state) => state.setFuzzySearchEnabled
+  );
 
   return (
     <Modal
@@ -204,6 +216,30 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
             size="sm"
             style={{ maxWidth: 200 }}
           />
+        </Card>
+
+        <Divider />
+
+        {/* Fuzzy Search Toggle */}
+        <Card withBorder p="md" className="animate-slide-up">
+          <Group justify="space-between" mb="xs">
+            <Group>
+              <IconSearch size={18} />
+              <Text fw={500}>{t("fuzzySearch")}</Text>
+            </Group>
+            <Switch
+              checked={fuzzySearchEnabled}
+              onChange={(event) =>
+                setFuzzySearchEnabled(event.currentTarget.checked)
+              }
+              size="md"
+              onLabel="✅"
+              offLabel="❌"
+            />
+          </Group>
+          <Text size="sm" c="dimmed">
+            {t("fuzzySearchDescription")}
+          </Text>
         </Card>
 
         <Divider />

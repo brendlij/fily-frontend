@@ -1,36 +1,27 @@
 "use client";
 
+import { createContext, useContext, ReactNode } from "react";
+import { translations, TranslationKey } from "../lib/translations";
+import type { Language } from "../lib/translations";
 import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { MantineColorScheme } from "@mantine/core";
-import { Language, translations, TranslationKey } from "../lib/translations";
-
-export type CustomColorScheme =
-  | "blue"
-  | "green"
-  | "red"
-  | "grape"
-  | "orange"
-  | "teal"
-  | "pink"
-  | "cyan";
+  useSettingsStore,
+  type CustomColorScheme,
+  type MantineColorScheme,
+  type SortByType,
+  type SortDirType,
+} from "../store/useSettingsStore";
 
 interface ThemeContextType {
   colorScheme: MantineColorScheme;
   customColor: CustomColorScheme;
   language: Language;
-  sortBy: "name" | "type" | "modified" | "size";
-  sortDir: "asc" | "desc";
+  sortBy: SortByType;
+  sortDir: SortDirType;
   toggleColorScheme: () => void;
   setCustomColor: (color: CustomColorScheme) => void;
   setLanguage: (language: Language) => void;
-  setSortBy: (val: "name" | "type" | "modified" | "size") => void;
-  setSortDir: (val: "asc" | "desc") => void;
+  setSortBy: (val: SortByType) => void;
+  setSortDir: (val: SortDirType) => void;
   t: (key: TranslationKey) => string;
   isHydrated: boolean;
 }
@@ -38,107 +29,49 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [colorScheme, setColorScheme] = useState<MantineColorScheme>("light");
-  const [customColor, setCustomColorValue] =
-    useState<CustomColorScheme>("blue");
-  const [language, setLanguageValue] = useState<Language>("de");
-  const [sortBy, setSortByValue] = useState<
-    "name" | "type" | "modified" | "size"
-  >("name");
-  const [sortDir, setSortDirValue] = useState<"asc" | "desc">("asc");
-  const [isHydrated, setIsHydrated] = useState(false);
+  // Verwende den zustand Store anstelle von lokalen useState-Hooks
+  const {
+    colorScheme,
+    customColor,
+    language,
+    sortBy,
+    sortDir,
+    isHydrated,
+    toggleColorScheme: storeToggleColorScheme,
+    setCustomColor: storeSetCustomColor,
+    setLanguage: storeSetLanguage,
+    setSortBy: storeSetSortBy,
+    setSortDir: storeSetSortDir,
+  } = useSettingsStore();
 
-  useEffect(() => {
-    // Load saved preferences after hydration
-    const savedScheme = localStorage.getItem(
-      "fily-color-scheme"
-    ) as MantineColorScheme;
-    let savedColor = localStorage.getItem("fily-custom-color");
-    const savedLanguage = localStorage.getItem("fily-language") as Language;
-    const savedSortBy = localStorage.getItem(
-      "fily-sort-by"
-    ) as ThemeContextType["sortBy"];
-    const savedSortDir = localStorage.getItem(
-      "fily-sort-dir"
-    ) as ThemeContextType["sortDir"];
-
-    // Migration: Convert old 'purple' to 'grape'
-    if (savedColor === "purple") {
-      savedColor = "grape";
-      localStorage.setItem("fily-custom-color", "grape");
-    }
-
-    if (savedScheme) setColorScheme(savedScheme);
-    if (
-      savedColor &&
-      [
-        "blue",
-        "green",
-        "red",
-        "grape",
-        "orange",
-        "teal",
-        "pink",
-        "cyan",
-      ].includes(savedColor)
-    ) {
-      setCustomColorValue(savedColor as CustomColorScheme);
-    }
-    if (savedLanguage && ["de", "en", "fr"].includes(savedLanguage)) {
-      setLanguageValue(savedLanguage);
-    }
-    if (
-      savedSortBy &&
-      ["name", "type", "modified", "size"].includes(savedSortBy)
-    ) {
-      setSortByValue(savedSortBy);
-    }
-    if (savedSortDir && ["asc", "desc"].includes(savedSortDir)) {
-      setSortDirValue(savedSortDir);
-    }
-
-    setIsHydrated(true);
-  }, []);
-
+  // Wrapper-Funktionen, um die Store-Funktionen direkt im ThemeContext zu verwenden
   const toggleColorScheme = () => {
-    const newScheme: MantineColorScheme =
-      colorScheme === "light" ? "dark" : "light";
-    setColorScheme(newScheme);
-    if (isHydrated) {
-      localStorage.setItem("fily-color-scheme", newScheme);
-    }
+    storeToggleColorScheme();
   };
 
   const setCustomColor = (color: CustomColorScheme) => {
-    setCustomColorValue(color);
-    if (isHydrated) {
-      localStorage.setItem("fily-custom-color", color);
-    }
+    storeSetCustomColor(color);
   };
 
   const setLanguage = (newLanguage: Language) => {
-    setLanguageValue(newLanguage);
-    if (isHydrated) {
-      localStorage.setItem("fily-language", newLanguage);
-    }
+    storeSetLanguage(newLanguage);
   };
 
-  const setSortBy = (val: ThemeContextType["sortBy"]) => {
-    setSortByValue(val);
-    if (isHydrated) {
-      localStorage.setItem("fily-sort-by", val);
-    }
+  const setSortBy = (val: SortByType) => {
+    storeSetSortBy(val);
   };
 
-  const setSortDir = (val: ThemeContextType["sortDir"]) => {
-    setSortDirValue(val);
-    if (isHydrated) {
-      localStorage.setItem("fily-sort-dir", val);
-    }
+  const setSortDir = (val: SortDirType) => {
+    storeSetSortDir(val);
   };
 
+  // Übersetzungsfunktion
   const t = (key: TranslationKey): string => {
-    return translations[language][key];
+    return (
+      translations[language as keyof typeof translations]?.[
+        key as keyof (typeof translations)[typeof language]
+      ] || key
+    );
   };
 
   return (

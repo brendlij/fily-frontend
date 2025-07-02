@@ -10,7 +10,7 @@ interface FileModalProps {
   onClose: () => void;
   content: {
     url: string;
-    type: "image" | "pdf" | "text" | "markdown" | "json" | null;
+    type: "image" | "pdf" | "text" | "markdown" | "json" | "video" | null;
     text?: string;
     name?: string;
   } | null;
@@ -201,6 +201,15 @@ export function FileModal({ opened, onClose, content }: FileModalProps) {
             }}
           />
         );
+
+      case "video":
+        return objectUrl ? (
+          <video
+            src={objectUrl}
+            controls
+            style={{ width: "100%", maxHeight: "600px", borderRadius: "8px" }}
+          />
+        ) : null;
 
       default:
         return (

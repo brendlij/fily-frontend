@@ -45,6 +45,10 @@ export const translations = {
     newFolder: "Neuer Ordner",
     uploadFile: "Datei hochladen",
 
+    // Search
+    fuzzySearch: "Erweiterte Suche",
+    fuzzySearchDescription: "Aktiviert unscharfe Suche und Keyword-Erkennung",
+
     // Tooltips
     toHome: "Zur Startseite",
     createNewFolder: "Neuen Ordner erstellen",
@@ -183,6 +187,10 @@ export const translations = {
     newFolder: "New Folder",
     uploadFile: "Upload File",
 
+    // Search
+    fuzzySearch: "Advanced Search",
+    fuzzySearchDescription: "Enables fuzzy search and keyword detection",
+
     // Tooltips
     toHome: "Go to home",
     createNewFolder: "Create new folder",
@@ -317,6 +325,11 @@ export const translations = {
     back: "Retour",
     newFolder: "Nouveau Dossier",
     uploadFile: "Télécharger un fichier",
+
+    // Search
+    fuzzySearch: "Recherche Avancée",
+    fuzzySearchDescription:
+      "Active la recherche floue et la détection de mots-clés",
 
     // Tooltips
     toHome: "Aller à l'accueil",

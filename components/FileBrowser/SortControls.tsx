@@ -3,9 +3,10 @@
 import { ActionIcon, Group, Select, Text } from "@mantine/core";
 import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 import { useTheme } from "../../contexts/ThemeContext";
-
-type SortByType = "name" | "type" | "modified" | "size";
-type SortDirType = "asc" | "desc";
+import {
+  type SortByType,
+  type SortDirType,
+} from "../../store/useSettingsStore";
 
 interface SortControlsProps {
   sortBy: SortByType;
