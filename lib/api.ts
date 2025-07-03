@@ -116,6 +116,13 @@ export const api = {
 
   delete: <T>(endpoint: string, options: Omit<ApiOptions, "method"> = {}) =>
     apiRequest<T>(endpoint, { ...options, method: "DELETE" }),
+
+  // Neue Funktion zum Verschieben von Dateien
+  moveFile: <T>(sourcePath: string, targetPath: string) =>
+    apiRequest<T>("/files/move", {
+      method: "POST",
+      body: { source: sourcePath, target: targetPath },
+    }),
 };
 
 export default api;

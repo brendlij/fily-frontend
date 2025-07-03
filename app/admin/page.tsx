@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/AuthGuard";
 import useAuthStore from "@/store/useAuthStore";
 import { useTheme } from "@/contexts/ThemeContext";
+import { UserDeleteModal } from "@/components/UserDeleteModal";
 import api from "@/lib/api";
 
 interface User {
@@ -38,7 +39,7 @@ interface User {
 export default function AdminPage() {
   const { t } = useTheme();
   const router = useRouter();
-  const { isAdmin } = useAuthStore();
+  const { isAdmin, username: currentUsername } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -105,6 +106,16 @@ export default function AdminPage() {
   };
 
   const handleToggleAdmin = async (user: User) => {
+    // Verhindern, dass ein Admin sich selbst die Admin-Rechte entzieht
+    if (user.username === currentUsername) {
+      notifications.show({
+        title: t("error"),
+        message: "Sie können Ihre eigenen Admin-Rechte nicht ändern",
+        color: "orange",
+      });
+      return;
+    }
+
     try {
       await api.put(`/admin/users/${user.id}/role`, {
         isAdmin: !user.isAdmin,
@@ -130,6 +141,10 @@ export default function AdminPage() {
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [newUserPassword, setNewUserPassword] = useState("");
+
+  // State für das Delete-Modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const handleChangePassword = async () => {
     if (!selectedUserId || !newUserPassword) {
@@ -169,13 +184,26 @@ export default function AdminPage() {
     setChangePasswordModalOpen(true);
   };
 
-  const handleDeleteUser = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete user ${user.username}?`)) {
+  const openDeleteModal = (user: User) => {
+    // Verhindern, dass ein Admin sich selbst löschen kann
+    if (user.username === currentUsername) {
+      notifications.show({
+        title: t("error"),
+        message: "Sie können Ihr eigenes Konto nicht löschen",
+        color: "orange",
+      });
       return;
     }
 
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
     try {
-      await api.delete(`/admin/users/${user.id}`);
+      await api.delete(`/admin/users/${userToDelete.id}`);
 
       notifications.show({
         title: t("success"),
@@ -183,6 +211,11 @@ export default function AdminPage() {
         color: "green",
       });
 
+      // Modal schließen und State zurücksetzen
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
+
+      // Benutzerliste aktualisieren
       fetchUsers();
     } catch (error) {
       notifications.show({
@@ -235,7 +268,10 @@ export default function AdminPage() {
                     <Switch
                       checked={user.isAdmin}
                       onChange={() => handleToggleAdmin(user)}
-                      disabled={user.username === "admin"} // Prevent changing the main admin
+                      disabled={
+                        user.username === "admin" ||
+                        user.username === currentUsername
+                      } // Prevent changing own admin status or main admin
                     />
                   </Table.Td>
                   <Table.Td>
@@ -252,8 +288,11 @@ export default function AdminPage() {
                         color="red"
                         size="xs"
                         leftSection={<IconTrash size={16} />}
-                        onClick={() => handleDeleteUser(user)}
-                        disabled={user.username === "admin"} // Prevent deleting the main admin
+                        onClick={() => openDeleteModal(user)}
+                        disabled={
+                          user.username === "admin" ||
+                          user.username === currentUsername
+                        } // Prevent deleting the main admin or own account
                       >
                         Delete
                       </Button>
@@ -336,6 +375,17 @@ export default function AdminPage() {
             <Button onClick={handleChangePassword}>Change Password</Button>
           </Group>
         </Modal>
+
+        {/* Lösch-Bestätigungsmodal */}
+        <UserDeleteModal
+          opened={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setUserToDelete(null);
+          }}
+          user={userToDelete}
+          onDelete={handleDeleteUser}
+        />
       </Container>
     </AuthGuard>
   );

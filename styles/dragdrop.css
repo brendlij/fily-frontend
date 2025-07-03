@@ -1,0 +1,56 @@
+.dragging {
+  opacity: 0.6;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.drop-target {
+  background-color: var(--mantine-color-green-1);
+  border: 2px dashed var(--mantine-color-green-6);
+  transform: scale(1.05);
+}
+
+/* Animation für erfolgreichen Drop */
+@keyframes success-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.drop-success {
+  animation: success-pulse 0.5s ease-in-out;
+}
+
+/* Animation für fliegende Datei */
+@keyframes fly-to-folder {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(var(--fly-x) * 0.6), calc(var(--fly-y) * 0.6)) scale(0.7);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--fly-x), var(--fly-y)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.file-flying {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  animation: fly-to-folder 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Sanfte Animation für das Nachrücken der Grid-Elemente */
+.file-grid .mantine-Col-root {
+  transition: all 0.3s ease-in-out;
+}

@@ -48,6 +48,13 @@ interface FileCardProps {
   onDelete: (item: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem) => void;
   formatFileSize: (bytes: number) => string;
+  // Drag & Drop Props
+  isDragging?: boolean;
+  isDropTarget?: boolean;
+  onDragStart?: (e: React.DragEvent, item: FileItem) => void;
+  onDragOver?: (e: React.DragEvent, item: FileItem) => void;
+  onDrop?: (e: React.DragEvent, item: FileItem) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -90,7 +97,16 @@ export function FileCard({
   onDelete,
   onContextMenu,
   formatFileSize,
-}: FileCardProps) {
+  // Drag & Drop Props
+  isDragging,
+  isDropTarget,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  "data-file-id": dataFileId,
+  ...otherProps
+}: FileCardProps & { "data-file-id"?: string }) {
   const { t } = useTheme();
 
   const ext =
@@ -105,7 +121,10 @@ export function FileCard({
     <Card
       p="md"
       withBorder
-      className="hover-lift"
+      data-file-id={dataFileId || item.path}
+      className={`hover-lift ${isDragging ? "dragging" : ""} ${
+        isDropTarget ? "drop-target" : ""
+      }`}
       style={{
         cursor: "pointer",
         transition: "all 0.2s ease",
@@ -114,17 +133,26 @@ export function FileCard({
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        backgroundColor:
-          item.type === "directory"
-            ? "var(--mantine-color-primary-filled)"
-            : undefined,
-        borderColor:
-          item.type === "directory"
-            ? "var(--mantine-primary-color-filled)"
-            : undefined,
+        backgroundColor: isDropTarget
+          ? "var(--mantine-color-green-light)"
+          : item.type === "directory"
+          ? "var(--mantine-color-primary-filled)"
+          : undefined,
+        borderColor: isDropTarget
+          ? "var(--mantine-color-green-filled)"
+          : item.type === "directory"
+          ? "var(--mantine-primary-color-filled)"
+          : undefined,
+        opacity: isDragging ? 0.6 : 1,
+        transform: isDropTarget ? "scale(1.05)" : undefined,
       }}
       onClick={() => onItemClick(item)}
       onContextMenu={(e) => onContextMenu(e, item)}
+      draggable={item.type === "file"}
+      onDragStart={onDragStart ? (e) => onDragStart(e, item) : undefined}
+      onDragOver={onDragOver ? (e) => onDragOver(e, item) : undefined}
+      onDrop={onDrop ? (e) => onDrop(e, item) : undefined}
+      onDragEnd={onDragEnd}
     >
       {/* 3-Punkte-Icon oben rechts */}
       <div
